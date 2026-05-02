@@ -1,36 +1,90 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Minavolve
 
-## Getting Started
+Minavolve is an Agile sprint board product concept with room for an AI assistant. This repository currently ships the visual foundation: a polished landing page, placeholder authentication routes, and a dashboard shell that later issues can connect to Supabase, drag-and-drop interactions, and AI workflows.
 
-First, run the development server:
+## What this issue includes
+
+- A marketing landing page for the Minavolve concept
+- App Router route structure for `/`, `/login`, `/register`, and `/dashboard`
+- Shared product copy in `src/lib/site.ts`
+- Reusable marketing components for the landing page
+- Placeholder auth and dashboard pages with intentional styling
+- Starter environment variable documentation in `.env.example`
+
+## What is intentionally not implemented yet
+
+- No Supabase setup or database calls
+- No real authentication or session handling
+- No drag-and-drop board behavior
+- No AI API routes or provider integration
+
+## Tech stack
+
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- `lucide-react` icons
+
+## Local setup
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Create a local environment file:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   On Windows PowerShell:
+
+   ```powershell
+   Copy-Item .env.example .env.local
+   ```
+
+3. Start the dev server:
+
+   ```bash
+   npm run dev
+   ```
+
+4. Open the app in your browser:
+
+   - `http://localhost:3000/`
+   - `http://localhost:3000/login`
+   - `http://localhost:3000/register`
+   - `http://localhost:3000/dashboard`
+
+## Linting
+
+Run the project linter with:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Route guide
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `/`: product landing page for Minavolve
+- `/login`: placeholder sign-in screen
+- `/register`: placeholder account creation screen
+- `/dashboard`: placeholder sprint board shell
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment variables
 
-## Learn More
+The app does not consume external services yet, but `.env.example` documents the variables planned for upcoming issues:
 
-To learn more about Next.js, take a look at the following resources:
+- `NEXT_PUBLIC_APP_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `OPENAI_API_KEY`
+- `ANTHROPIC_API_KEY`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Why this is a good recruiter/reviewer snapshot
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This foundation demonstrates product framing, route organization, design consistency, and readiness for future backend integration without mixing in unfinished auth or data concerns. It gives reviewers a clear picture of how the product is intended to feel before the interactive workflow work begins.
