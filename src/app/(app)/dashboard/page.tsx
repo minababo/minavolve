@@ -1,23 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
-  ArrowLeft,
   Bot,
   CheckCircle2,
   Clock3,
   LayoutDashboard,
+  LogOut,
+  ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import { redirect } from "next/navigation";
 
+import { logout } from "@/app/(app)/dashboard/actions";
 import { Button } from "@/components/ui/button";
 import { roadmapItems, sprintBoardPreview } from "@/lib/site";
+import { createClient } from "@/utils/supabase/server";
 
 export const metadata: Metadata = {
   title: "Dashboard",
-  description: "Placeholder dashboard route for the Minavolve app foundation.",
+  description: "Protected dashboard route for Minavolve.",
 };
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
   return (
     <main className="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -29,36 +42,38 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="text-sm font-medium uppercase tracking-[0.24em] text-brand">
-                  Dashboard placeholder
+                  Authenticated dashboard
                 </p>
                 <h1 className="mt-2 font-heading text-3xl font-semibold text-slate-950">
                   Sprint board shell
                 </h1>
                 <p className="mt-2 max-w-2xl text-base leading-7 text-slate-700">
-                  This route is intentionally non-authenticated and static for
-                  now. It demonstrates the future workspace layout without
-                  shipping data persistence, permissions, or drag-and-drop
-                  behavior yet.
+                  You are signed in as{" "}
+                  <span className="font-semibold text-slate-950">
+                    {user.email}
+                  </span>
+                  . Project, sprint, and Kanban data will be added in later
+                  issues.
                 </p>
               </div>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                disabled
-                size="lg"
-                className="rounded-full px-6"
-              >
-                AI actions later
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="rounded-full border-slate-300 bg-white"
-              >
-                <Link href="/">Back to landing page</Link>
-              </Button>
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-800">
+                <ShieldCheck className="size-4" />
+                Session verified
+              </div>
+              <form action={logout}>
+                <Button
+                  type="submit"
+                  size="lg"
+                  variant="outline"
+                  className="w-full rounded-full border-slate-300 bg-white px-6 sm:w-auto"
+                >
+                  <LogOut className="size-4" />
+                  Logout
+                </Button>
+              </form>
             </div>
           </div>
         </header>
@@ -76,10 +91,10 @@ export default function DashboardPage() {
               </div>
               <div className="flex flex-wrap gap-2 text-sm">
                 <span className="rounded-full bg-brand-soft px-3 py-1.5 text-brand">
-                  4 columns
+                  Static preview
                 </span>
                 <span className="rounded-full bg-amber-100 px-3 py-1.5 text-amber-900">
-                  Placeholder cards
+                  CRUD later
                 </span>
               </div>
             </div>
@@ -130,16 +145,15 @@ export default function DashboardPage() {
                 <Bot className="size-5 text-cyan-300" />
               </div>
               <p className="mt-3 text-sm leading-7 text-slate-300">
-                The future AI surface will live here. For now, this card marks
-                the dedicated UI area for summaries, sprint risk prompts, and
-                planning suggestions.
+                The future AI surface remains a placeholder. Authentication is
+                now in place; AI API calls are still intentionally out of scope.
               </p>
 
               <div className="mt-6 space-y-3">
                 {[
-                  "Summarize standup updates",
-                  "Draft sprint review notes",
-                  "Highlight tasks that may slip",
+                  "Supabase session refresh is active",
+                  "Dashboard access requires a verified user",
+                  "Logout clears the Supabase Auth session",
                 ].map((item) => (
                   <div
                     key={item}
@@ -188,11 +202,10 @@ export default function DashboardPage() {
         </section>
 
         <Link
-          href="/login"
+          href="/"
           className="inline-flex items-center gap-2 text-sm text-slate-600 transition-colors hover:text-slate-950"
         >
-          <ArrowLeft className="size-4" />
-          Open auth placeholder routes
+          Back to public landing page
         </Link>
       </div>
     </main>

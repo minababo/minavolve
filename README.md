@@ -8,14 +8,13 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
 - App Router route structure for `/`, `/login`, `/register`, and `/dashboard`
 - Shared product copy in `src/lib/site.ts`
 - Reusable marketing components for the landing page
-- Placeholder auth and dashboard pages with intentional styling
+- Supabase email/password login, registration, logout, and protected dashboard access
 - Starter environment variable documentation in `.env.example`
 - Initial Supabase schema migration for projects, sprints, stories, risks, AI generations, activity, memberships, and profiles
 
 ## What is intentionally not implemented yet
 
-- No Supabase client integration or frontend database calls
-- No real authentication or session handling
+- No project CRUD or sprint CRUD
 - No drag-and-drop board behavior
 - No AI API routes or provider integration
 
@@ -77,14 +76,38 @@ npm run lint
 
 ## Environment variables
 
-The app does not consume external services yet, but `.env.example` documents the variables planned for upcoming issues:
+Copy `.env.example` to `.env.local` and provide the Supabase cloud project values:
 
 - `NEXT_PUBLIC_APP_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
+
+AI provider variables remain placeholders for later issues:
+
 - `OPENAI_API_KEY`
 - `ANTHROPIC_API_KEY`
+
+## Supabase Auth setup
+
+Issue #6 adds Supabase email/password authentication using `@supabase/ssr`. The app does not use `@supabase/auth-helpers-nextjs`.
+
+### Configure Supabase Cloud
+
+1. Confirm the Issue #2 SQL schema has already been applied.
+2. In the Supabase dashboard, go to `Authentication > Providers`.
+3. Enable the `Email` provider.
+4. Choose whether email confirmation is required.
+5. In `Authentication > URL Configuration`, set the site URL to the deployed app URL. For local development, use `http://localhost:3000`.
+6. Add local and deployed redirect URLs as needed, starting with `http://localhost:3000/**`.
+
+### Auth behavior
+
+- `/` remains public.
+- `/login` signs users in with Supabase Auth and redirects authenticated users to `/dashboard`.
+- `/register` creates a Supabase Auth user. If email confirmation is disabled, the new user is redirected to `/dashboard`; if confirmation is enabled, the page sends the user back to login with a check-your-email message.
+- `/dashboard` verifies the user on the server with `supabase.auth.getUser()` and redirects unauthenticated users to `/login`.
+- The dashboard shows the authenticated user's email and includes a logout form.
+- `middleware.ts` refreshes Supabase auth cookies through the `@supabase/ssr` server client.
 
 ## Supabase database setup
 
