@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Plus } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import { logout } from "@/app/(app)/dashboard/actions";
@@ -7,10 +9,11 @@ import { AppTopbar } from "@/components/app/app-topbar";
 import { DashboardCard } from "@/components/app/dashboard-card";
 import { DashboardSection } from "@/components/app/dashboard-section";
 import { KanbanPreview } from "@/components/app/kanban-preview";
+import { Button } from "@/components/ui/button";
 import {
   analyticsHighlights,
   assistantPrompts,
-  dashboardSummaryCards,
+  getDashboardSummaryCards,
   recentProjects,
   riskRegisterItems,
   sprintPlanningItems,
@@ -33,6 +36,10 @@ export default async function DashboardPage() {
   }
 
   const userEmail = user.email ?? "Authenticated user";
+  const { count: projectCount } = await supabase
+    .from("projects")
+    .select("id", { count: "exact", head: true });
+  const summaryCards = getDashboardSummaryCards(projectCount ?? 0);
 
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
@@ -48,7 +55,7 @@ export default async function DashboardPage() {
             className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
             aria-label="Dashboard summary"
           >
-            {dashboardSummaryCards.map((card) => (
+            {summaryCards.map((card) => (
               <DashboardCard
                 key={card.label}
                 label={card.label}
@@ -67,11 +74,18 @@ export default async function DashboardPage() {
                 id="recent-projects"
                 eyebrow="Portfolio"
                 title="Recent projects"
-                description="Static project rows provide the dashboard shape before Supabase project queries are connected."
+                description="Project CRUD is now available. This dashboard section still keeps a lightweight planning preview until richer project activity lands."
                 action={
-                  <span className="rounded-full bg-brand-soft px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-brand">
-                    Placeholder data
-                  </span>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="h-10 rounded-2xl bg-slate-950 px-4 text-white hover:bg-slate-800"
+                  >
+                    <Link href="/projects/new">
+                      <Plus className="size-4" />
+                      New project
+                    </Link>
+                  </Button>
                 }
               >
                 <div className="grid gap-3">

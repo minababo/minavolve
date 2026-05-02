@@ -5,7 +5,11 @@ import { dashboardFocusItems, dashboardNavItems } from "@/lib/dashboard";
 import { siteConfig } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
-export function AppSidebar() {
+type AppSidebarProps = {
+  activeHref?: string;
+};
+
+export function AppSidebar({ activeHref = "/dashboard" }: AppSidebarProps) {
   return (
     <aside className="lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)]">
       <div className="flex h-full flex-col rounded-[2rem] border border-white/80 bg-slate-950 p-4 text-slate-50 shadow-[0_32px_90px_-55px_rgba(15,23,42,0.95)] sm:p-5">
@@ -22,32 +26,38 @@ export function AppSidebar() {
         </Link>
 
         <nav className="mt-7 space-y-1" aria-label="Dashboard navigation">
-          {dashboardNavItems.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              aria-current={item.active ? "page" : undefined}
-              className={cn(
-                "group flex items-center justify-between rounded-2xl px-3 py-3 text-sm font-medium transition-colors",
-                item.active
-                  ? "bg-white text-slate-950"
-                  : "text-slate-300 hover:bg-white/10 hover:text-white",
-              )}
-            >
-              <span className="flex items-center gap-3">
-                <item.Icon className="size-4" />
-                {item.label}
-              </span>
-              {item.active ? (
-                <ChevronRight className="size-4 text-brand" />
-              ) : null}
-            </Link>
-          ))}
+          {dashboardNavItems.map((item) => {
+            const isActive =
+              item.href === activeHref ||
+              (item.href === "/projects" && activeHref.startsWith("/projects"));
+
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "group flex items-center justify-between rounded-2xl px-3 py-3 text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-white text-slate-950"
+                    : "text-slate-300 hover:bg-white/10 hover:text-white",
+                )}
+              >
+                <span className="flex items-center gap-3">
+                  <item.Icon className="size-4" />
+                  {item.label}
+                </span>
+                {isActive ? (
+                  <ChevronRight className="size-4 text-brand" />
+                ) : null}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="mt-7 rounded-[1.5rem] border border-white/10 bg-white/[0.06] p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200">
-            Issue #8 scope
+            Current scope
           </p>
           <div className="mt-4 space-y-4">
             {dashboardFocusItems.map((item) => (
