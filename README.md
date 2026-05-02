@@ -10,10 +10,11 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
 - Reusable marketing components for the landing page
 - Placeholder auth and dashboard pages with intentional styling
 - Starter environment variable documentation in `.env.example`
+- Initial Supabase schema migration for projects, sprints, stories, risks, AI generations, activity, memberships, and profiles
 
 ## What is intentionally not implemented yet
 
-- No Supabase setup or database calls
+- No Supabase client integration or frontend database calls
 - No real authentication or session handling
 - No drag-and-drop board behavior
 - No AI API routes or provider integration
@@ -84,6 +85,69 @@ The app does not consume external services yet, but `.env.example` documents the
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `OPENAI_API_KEY`
 - `ANTHROPIC_API_KEY`
+
+## Supabase database setup
+
+Issue #2 adds the initial Supabase schema in:
+
+```text
+supabase/migrations/20260503000100_initial_schema.sql
+```
+
+The migration is designed for a Supabase cloud project. It creates the public app tables, enables Row Level Security, adds membership-based policies for authenticated users, and installs triggers for profile creation, project owner membership, and `updated_at` maintenance.
+
+### Apply in Supabase Cloud
+
+1. Open the Supabase dashboard for the Minavolve project.
+2. Go to `SQL Editor`.
+3. Open `supabase/migrations/20260503000100_initial_schema.sql`.
+4. Paste the full SQL into a new query.
+5. Run the query.
+6. Confirm these tables exist in the `public` schema:
+
+   - `profiles`
+   - `projects`
+   - `project_members`
+   - `sprints`
+   - `user_stories`
+   - `risks`
+   - `ai_generations`
+   - `activity_events`
+
+7. In `Authentication > Policies` or the Table Editor, confirm RLS is enabled for every table listed above.
+
+You can also verify the cloud project from the SQL Editor:
+
+```sql
+select tablename, rowsecurity
+from pg_tables
+where schemaname = 'public'
+  and tablename in (
+    'profiles',
+    'projects',
+    'project_members',
+    'sprints',
+    'user_stories',
+    'risks',
+    'ai_generations',
+    'activity_events'
+  )
+order by tablename;
+
+select tablename, policyname, cmd, roles
+from pg_policies
+where schemaname = 'public'
+order by tablename, policyname;
+```
+
+### Schema notes
+
+- Supabase Auth remains the source of truth for users in `auth.users`.
+- `public.profiles` references `auth.users(id)` and is created automatically by the `on_auth_user_created` trigger.
+- `public.projects.owner_id` references `public.profiles(id)`.
+- Creating a project automatically adds the creator to `public.project_members` with the `owner` role.
+- Project data access is based on `public.is_project_member(project_id)` and `public.is_project_owner(project_id)` helper functions.
+- Activity events are append-only for authenticated project members through RLS; no update or delete policy is defined for normal clients.
 
 ## Why this is a good recruiter/reviewer snapshot
 
