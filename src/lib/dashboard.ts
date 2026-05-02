@@ -18,7 +18,6 @@ export type DashboardNavItem = {
   label: string;
   href: string;
   Icon: LucideIcon;
-  active?: boolean;
 };
 
 export type DashboardSummaryCard = {
@@ -79,36 +78,35 @@ export const dashboardNavItems: DashboardNavItem[] = [
     label: "Dashboard",
     href: "/dashboard",
     Icon: LayoutDashboard,
-    active: true,
   },
   {
-    label: "Recent projects",
-    href: "#recent-projects",
+    label: "Projects",
+    href: "/projects",
     Icon: FolderKanban,
   },
   {
     label: "Sprint planning",
-    href: "#sprint-planning",
+    href: "/dashboard#sprint-planning",
     Icon: ClipboardList,
   },
   {
     label: "Kanban preview",
-    href: "#kanban-preview",
+    href: "/dashboard#kanban-preview",
     Icon: ListChecks,
   },
   {
     label: "Risk register",
-    href: "#risk-register",
+    href: "/dashboard#risk-register",
     Icon: ShieldAlert,
   },
   {
     label: "Analytics",
-    href: "#delivery-analytics",
+    href: "/dashboard#delivery-analytics",
     Icon: BarChart3,
   },
   {
     label: "AI assistant",
-    href: "#ai-assistant",
+    href: "/dashboard#ai-assistant",
     Icon: Bot,
   },
 ];
@@ -116,9 +114,9 @@ export const dashboardNavItems: DashboardNavItem[] = [
 export const dashboardSummaryCards: DashboardSummaryCard[] = [
   {
     label: "Projects",
-    value: "4",
-    detail: "Product workspaces staged for CRUD integration.",
-    trend: "+2 ready for schema wiring",
+    value: "0",
+    detail: "Supabase projects where the current user is a member.",
+    trend: "Create a project to seed the workspace",
     tone: "blue",
     Icon: FolderKanban,
   },
@@ -147,6 +145,23 @@ export const dashboardSummaryCards: DashboardSummaryCard[] = [
     Icon: ShieldAlert,
   },
 ];
+
+export function getDashboardSummaryCards(projectCount: number) {
+  return dashboardSummaryCards.map((card) => {
+    if (card.label !== "Projects") {
+      return card;
+    }
+
+    return {
+      ...card,
+      value: String(projectCount),
+      trend:
+        projectCount === 1
+          ? "1 project available through RLS"
+          : `${projectCount} projects available through RLS`,
+    };
+  });
+}
 
 export const recentProjects: RecentProject[] = [
   {
@@ -336,8 +351,8 @@ export const dashboardFocusItems = [
     Icon: CircleDot,
   },
   {
-    label: "Static operating model",
-    detail: "Metrics and cards are placeholders until project CRUD lands.",
+    label: "Project CRUD foundation",
+    detail: "Projects can be created and listed through Supabase RLS.",
     Icon: Gauge,
   },
   {

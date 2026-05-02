@@ -1,6 +1,6 @@
 # Minavolve
 
-Minavolve is an Agile sprint board product concept with room for an AI assistant. This repository currently ships a polished landing page, Supabase email/password authentication, and an authenticated dashboard layout that later issues can connect to project data, drag-and-drop interactions, and AI workflows.
+Minavolve is an Agile sprint board product concept with room for an AI assistant. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, and initial Supabase-backed project creation/listing that later issues can extend with sprints, stories, drag-and-drop interactions, and AI workflows.
 
 ## What this issue includes
 
@@ -10,12 +10,14 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
 - Reusable marketing components for the landing page
 - Supabase email/password login, registration, logout, and protected dashboard access
 - Authenticated dashboard layout with sidebar navigation, top bar, static summary metrics, placeholder work sections, and a five-column Kanban preview
+- Authenticated project listing, project creation, and a basic project workspace placeholder backed by Supabase RLS
 - Starter environment variable documentation in `.env.example`
 - Initial Supabase schema migration for projects, sprints, stories, risks, AI generations, activity, memberships, and profiles
 
 ## What is intentionally not implemented yet
 
-- No project CRUD or sprint CRUD
+- No project editing or deletion
+- No sprint CRUD
 - No drag-and-drop board behavior
 - No AI API routes or provider integration
 
@@ -59,6 +61,8 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
    - `http://localhost:3000/login`
    - `http://localhost:3000/register`
    - `http://localhost:3000/dashboard`
+   - `http://localhost:3000/projects`
+   - `http://localhost:3000/projects/new`
 
 ## Linting
 
@@ -74,6 +78,9 @@ npm run lint
 - `/login`: Supabase email/password sign-in screen
 - `/register`: Supabase email/password account creation screen
 - `/dashboard`: protected authenticated dashboard shell with static layout data
+- `/projects`: protected Supabase-backed project list
+- `/projects/new`: protected project creation form
+- `/projects/[projectId]`: protected project workspace placeholder
 
 ## Dashboard status
 
@@ -81,11 +88,25 @@ Issue #8 adds the authenticated dashboard shell. The page keeps the existing ser
 
 Current dashboard content is intentionally static:
 
-- Summary cards for projects, active sprints, user stories, and open risks
+- Summary cards for projects, active sprints, user stories, and open risks. The project count is read from Supabase when available.
 - Placeholder sections for recent projects, sprint planning, Kanban preview, risk register, delivery analytics, and AI assistant
 - A visual Kanban preview with Backlog, To Do, In Progress, Review, and Done columns
 
-Real project queries, sprint CRUD, story management, drag-and-drop, charts, and AI provider calls remain out of scope for this issue.
+Sprint CRUD, story management, drag-and-drop, charts, and AI provider calls remain out of scope for this issue.
+
+## Project setup status
+
+Issue #10 adds initial project CRUD foundation:
+
+- `/projects` reads projects through Supabase RLS, so authenticated users only see projects where they are a member or owner.
+- `/projects/new` validates project input with Zod and creates rows in `public.projects`.
+- Project creation sets `owner_id` to the authenticated Supabase user id.
+- The database trigger is expected to add the creator to `public.project_members` as `owner`.
+- Successful project creation redirects to `/projects/[projectId]`.
+
+Project form fields are `name`, `project_key`, `description`, `status`, `start_date`, and `target_end_date`. The current implementation assumes the Supabase cloud schema includes these Issue #10 columns.
+
+If project creation returns a missing `project_key`, `start_date`, or `target_end_date` message, update the Supabase cloud `public.projects` table before retesting project creation.
 
 ## Environment variables
 
