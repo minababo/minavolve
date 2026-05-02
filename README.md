@@ -1,6 +1,6 @@
 # Minavolve
 
-Minavolve is an Agile sprint board product concept with room for an AI assistant. This repository currently ships the visual foundation: a polished landing page, placeholder authentication routes, and a dashboard shell that later issues can connect to Supabase, drag-and-drop interactions, and AI workflows.
+Minavolve is an Agile sprint board product concept with room for an AI assistant. This repository currently ships a polished landing page, Supabase email/password authentication, and an authenticated dashboard layout that later issues can connect to project data, drag-and-drop interactions, and AI workflows.
 
 ## What this issue includes
 
@@ -9,6 +9,7 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
 - Shared product copy in `src/lib/site.ts`
 - Reusable marketing components for the landing page
 - Supabase email/password login, registration, logout, and protected dashboard access
+- Authenticated dashboard layout with sidebar navigation, top bar, static summary metrics, placeholder work sections, and a five-column Kanban preview
 - Starter environment variable documentation in `.env.example`
 - Initial Supabase schema migration for projects, sprints, stories, risks, AI generations, activity, memberships, and profiles
 
@@ -70,9 +71,21 @@ npm run lint
 ## Route guide
 
 - `/`: product landing page for Minavolve
-- `/login`: placeholder sign-in screen
-- `/register`: placeholder account creation screen
-- `/dashboard`: placeholder sprint board shell
+- `/login`: Supabase email/password sign-in screen
+- `/register`: Supabase email/password account creation screen
+- `/dashboard`: protected authenticated dashboard shell with static layout data
+
+## Dashboard status
+
+Issue #8 adds the authenticated dashboard shell. The page keeps the existing server-side Supabase user check, shows the signed-in user's email in the top bar, and keeps logout wired through the dashboard server action.
+
+Current dashboard content is intentionally static:
+
+- Summary cards for projects, active sprints, user stories, and open risks
+- Placeholder sections for recent projects, sprint planning, Kanban preview, risk register, delivery analytics, and AI assistant
+- A visual Kanban preview with Backlog, To Do, In Progress, Review, and Done columns
+
+Real project queries, sprint CRUD, story management, drag-and-drop, charts, and AI provider calls remain out of scope for this issue.
 
 ## Environment variables
 

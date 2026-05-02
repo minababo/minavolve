@@ -1,0 +1,348 @@
+import type { LucideIcon } from "lucide-react";
+import {
+  BarChart3,
+  Bot,
+  CircleDot,
+  ClipboardList,
+  FolderKanban,
+  Gauge,
+  LayoutDashboard,
+  ListChecks,
+  MessageSquareText,
+  ShieldAlert,
+  Sparkles,
+  TimerReset,
+} from "lucide-react";
+
+export type DashboardNavItem = {
+  label: string;
+  href: string;
+  Icon: LucideIcon;
+  active?: boolean;
+};
+
+export type DashboardSummaryCard = {
+  label: string;
+  value: string;
+  detail: string;
+  trend: string;
+  tone: "blue" | "green" | "amber" | "rose";
+  Icon: LucideIcon;
+};
+
+export type RecentProject = {
+  name: string;
+  code: string;
+  status: string;
+  health: string;
+  focus: string;
+};
+
+export type SprintPlanningItem = {
+  label: string;
+  detail: string;
+  progress: string;
+};
+
+export type KanbanCard = {
+  title: string;
+  meta: string;
+  tag: string;
+};
+
+export type KanbanColumn = {
+  title: string;
+  count: string;
+  accentClass: string;
+  cards: KanbanCard[];
+};
+
+export type RiskItem = {
+  label: string;
+  severity: string;
+  owner: string;
+};
+
+export type AnalyticsHighlight = {
+  label: string;
+  value: string;
+  detail: string;
+};
+
+export type AssistantPrompt = {
+  label: string;
+  detail: string;
+};
+
+export const dashboardNavItems: DashboardNavItem[] = [
+  {
+    label: "Dashboard",
+    href: "/dashboard",
+    Icon: LayoutDashboard,
+    active: true,
+  },
+  {
+    label: "Recent projects",
+    href: "#recent-projects",
+    Icon: FolderKanban,
+  },
+  {
+    label: "Sprint planning",
+    href: "#sprint-planning",
+    Icon: ClipboardList,
+  },
+  {
+    label: "Kanban preview",
+    href: "#kanban-preview",
+    Icon: ListChecks,
+  },
+  {
+    label: "Risk register",
+    href: "#risk-register",
+    Icon: ShieldAlert,
+  },
+  {
+    label: "Analytics",
+    href: "#delivery-analytics",
+    Icon: BarChart3,
+  },
+  {
+    label: "AI assistant",
+    href: "#ai-assistant",
+    Icon: Bot,
+  },
+];
+
+export const dashboardSummaryCards: DashboardSummaryCard[] = [
+  {
+    label: "Projects",
+    value: "4",
+    detail: "Product workspaces staged for CRUD integration.",
+    trend: "+2 ready for schema wiring",
+    tone: "blue",
+    Icon: FolderKanban,
+  },
+  {
+    label: "Active sprints",
+    value: "2",
+    detail: "Static sprint cycles visible in the planning shell.",
+    trend: "1 sprint closing soon",
+    tone: "green",
+    Icon: TimerReset,
+  },
+  {
+    label: "User stories",
+    value: "28",
+    detail: "Placeholder backlog volume for the future board.",
+    trend: "9 shaped for next sprint",
+    tone: "amber",
+    Icon: MessageSquareText,
+  },
+  {
+    label: "Open risks",
+    value: "5",
+    detail: "Mock delivery risks waiting for real project data.",
+    trend: "2 need owner review",
+    tone: "rose",
+    Icon: ShieldAlert,
+  },
+];
+
+export const recentProjects: RecentProject[] = [
+  {
+    name: "Atlas onboarding",
+    code: "ATL",
+    status: "Discovery",
+    health: "On track",
+    focus: "Clarify first-run activation and team invite flow.",
+  },
+  {
+    name: "Northstar sprint rituals",
+    code: "NST",
+    status: "In sprint",
+    health: "Watch",
+    focus: "Keep ceremony notes and blockers visible in one view.",
+  },
+  {
+    name: "Orbit analytics",
+    code: "ORB",
+    status: "Planning",
+    health: "Healthy",
+    focus: "Define dashboard events before instrumentation begins.",
+  },
+];
+
+export const sprintPlanningItems: SprintPlanningItem[] = [
+  {
+    label: "Scope refinement",
+    detail: "Convert top backlog themes into testable stories.",
+    progress: "70%",
+  },
+  {
+    label: "Capacity check",
+    detail: "Balance committed work against team availability.",
+    progress: "45%",
+  },
+  {
+    label: "Review readiness",
+    detail: "Collect acceptance notes for demo candidates.",
+    progress: "30%",
+  },
+];
+
+export const kanbanColumns: KanbanColumn[] = [
+  {
+    title: "Backlog",
+    count: "8",
+    accentClass: "bg-slate-200 text-slate-700",
+    cards: [
+      {
+        title: "Define project empty state",
+        meta: "UX copy - product",
+        tag: "Ready",
+      },
+      {
+        title: "Map profile defaults",
+        meta: "Auth handoff - backend",
+        tag: "Needs review",
+      },
+    ],
+  },
+  {
+    title: "To Do",
+    count: "5",
+    accentClass: "bg-blue-100 text-blue-800",
+    cards: [
+      {
+        title: "Create sprint planning route",
+        meta: "App shell - frontend",
+        tag: "Next",
+      },
+      {
+        title: "Draft risk severity labels",
+        meta: "Domain model - product",
+        tag: "Queued",
+      },
+    ],
+  },
+  {
+    title: "In Progress",
+    count: "3",
+    accentClass: "bg-cyan-100 text-cyan-900",
+    cards: [
+      {
+        title: "Dashboard layout foundation",
+        meta: "Issue #8 - frontend",
+        tag: "Active",
+      },
+      {
+        title: "Auth smoke test notes",
+        meta: "Supabase - QA",
+        tag: "Blocked",
+      },
+    ],
+  },
+  {
+    title: "Review",
+    count: "2",
+    accentClass: "bg-amber-100 text-amber-900",
+    cards: [
+      {
+        title: "README auth setup",
+        meta: "Docs - reviewer",
+        tag: "PR",
+      },
+      {
+        title: "Dashboard copy pass",
+        meta: "Design - product",
+        tag: "QA",
+      },
+    ],
+  },
+  {
+    title: "Done",
+    count: "6",
+    accentClass: "bg-emerald-100 text-emerald-900",
+    cards: [
+      {
+        title: "Supabase SSR clients",
+        meta: "Auth - platform",
+        tag: "Shipped",
+      },
+      {
+        title: "Protected dashboard route",
+        meta: "Security - app",
+        tag: "Shipped",
+      },
+    ],
+  },
+];
+
+export const riskRegisterItems: RiskItem[] = [
+  {
+    label: "Email confirmation setting may differ across environments.",
+    severity: "Medium",
+    owner: "Auth",
+  },
+  {
+    label: "Kanban ordering depends on later drag-and-drop persistence.",
+    severity: "High",
+    owner: "Board",
+  },
+  {
+    label: "AI assistant requires provider limits and audit logging.",
+    severity: "Medium",
+    owner: "AI",
+  },
+];
+
+export const analyticsHighlights: AnalyticsHighlight[] = [
+  {
+    label: "Cycle time",
+    value: "3.8d",
+    detail: "Static benchmark until activity events are connected.",
+  },
+  {
+    label: "Sprint confidence",
+    value: "82%",
+    detail: "Placeholder signal for future delivery forecasting.",
+  },
+  {
+    label: "Review load",
+    value: "7",
+    detail: "Mock stories awaiting acceptance feedback.",
+  },
+];
+
+export const assistantPrompts: AssistantPrompt[] = [
+  {
+    label: "Summarize sprint health",
+    detail: "Future AI prompt for risks, blockers, and scope movement.",
+  },
+  {
+    label: "Draft standup notes",
+    detail: "Future assistant action for async team updates.",
+  },
+  {
+    label: "Find delivery risks",
+    detail: "Future prompt combining board activity and risk history.",
+  },
+];
+
+export const dashboardFocusItems = [
+  {
+    label: "Authenticated shell",
+    detail: "Server-side Supabase user check remains the route gate.",
+    Icon: CircleDot,
+  },
+  {
+    label: "Static operating model",
+    detail: "Metrics and cards are placeholders until project CRUD lands.",
+    Icon: Gauge,
+  },
+  {
+    label: "AI-ready surface",
+    detail: "Assistant space is designed, but no provider calls are made.",
+    Icon: Sparkles,
+  },
+];
