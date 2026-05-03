@@ -122,9 +122,9 @@ export const dashboardSummaryCards: DashboardSummaryCard[] = [
   },
   {
     label: "Active sprints",
-    value: "2",
-    detail: "Static sprint cycles visible in the planning shell.",
-    trend: "1 sprint closing soon",
+    value: "0",
+    detail: "Supabase sprints currently marked active.",
+    trend: "Create an active sprint to start delivery",
     tone: "green",
     Icon: TimerReset,
   },
@@ -146,20 +146,34 @@ export const dashboardSummaryCards: DashboardSummaryCard[] = [
   },
 ];
 
-export function getDashboardSummaryCards(projectCount: number) {
+export function getDashboardSummaryCards(
+  projectCount: number,
+  activeSprintCount = 0,
+) {
   return dashboardSummaryCards.map((card) => {
-    if (card.label !== "Projects") {
-      return card;
+    if (card.label === "Projects") {
+      return {
+        ...card,
+        value: String(projectCount),
+        trend:
+          projectCount === 1
+            ? "1 project available through RLS"
+            : `${projectCount} projects available through RLS`,
+      };
     }
 
-    return {
-      ...card,
-      value: String(projectCount),
-      trend:
-        projectCount === 1
-          ? "1 project available through RLS"
-          : `${projectCount} projects available through RLS`,
-    };
+    if (card.label === "Active sprints") {
+      return {
+        ...card,
+        value: String(activeSprintCount),
+        trend:
+          activeSprintCount === 1
+            ? "1 active sprint available through RLS"
+            : `${activeSprintCount} active sprints available through RLS`,
+      };
+    }
+
+    return card;
   });
 }
 
@@ -352,7 +366,7 @@ export const dashboardFocusItems = [
   },
   {
     label: "Project CRUD foundation",
-    detail: "Projects can be created and listed through Supabase RLS.",
+    detail: "Projects and sprints can be created through Supabase RLS.",
     Icon: Gauge,
   },
   {

@@ -1,6 +1,6 @@
 # Minavolve
 
-Minavolve is an Agile sprint board product concept with room for an AI assistant. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, and initial Supabase-backed project creation/listing that later issues can extend with sprints, stories, drag-and-drop interactions, and AI workflows.
+Minavolve is an Agile sprint board product concept with room for an AI assistant. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, and initial Supabase-backed project and sprint creation/listing that later issues can extend with stories, drag-and-drop interactions, and AI workflows.
 
 ## What this issue includes
 
@@ -11,14 +11,17 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
 - Supabase email/password login, registration, logout, and protected dashboard access
 - Authenticated dashboard layout with sidebar navigation, top bar, static summary metrics, placeholder work sections, and a five-column Kanban preview
 - Authenticated project listing, project creation, and a basic project workspace placeholder backed by Supabase RLS
+- Project-scoped sprint listing, sprint creation, and a basic sprint workspace placeholder backed by Supabase RLS
 - Starter environment variable documentation in `.env.example`
 - Initial Supabase schema migration for projects, sprints, stories, risks, AI generations, activity, memberships, and profiles
 
 ## What is intentionally not implemented yet
 
 - No project editing or deletion
-- No sprint CRUD
+- No sprint editing or deletion
+- No user story CRUD
 - No drag-and-drop board behavior
+- No charts or risk register CRUD
 - No AI API routes or provider integration
 
 ## Tech stack
@@ -63,6 +66,7 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
    - `http://localhost:3000/dashboard`
    - `http://localhost:3000/projects`
    - `http://localhost:3000/projects/new`
+   - `http://localhost:3000/projects/[projectId]/sprints/new`
 
 ## Linting
 
@@ -80,7 +84,9 @@ npm run lint
 - `/dashboard`: protected authenticated dashboard shell with static layout data
 - `/projects`: protected Supabase-backed project list
 - `/projects/new`: protected project creation form
-- `/projects/[projectId]`: protected project workspace placeholder
+- `/projects/[projectId]`: protected project workspace with project-scoped sprint list
+- `/projects/[projectId]/sprints/new`: protected sprint creation form
+- `/projects/[projectId]/sprints/[sprintId]`: protected sprint workspace placeholder
 
 ## Dashboard status
 
@@ -88,11 +94,11 @@ Issue #8 adds the authenticated dashboard shell. The page keeps the existing ser
 
 Current dashboard content is intentionally static:
 
-- Summary cards for projects, active sprints, user stories, and open risks. The project count is read from Supabase when available.
+- Summary cards for projects, active sprints, user stories, and open risks. Project and active sprint counts are read from Supabase when available.
 - Placeholder sections for recent projects, sprint planning, Kanban preview, risk register, delivery analytics, and AI assistant
 - A visual Kanban preview with Backlog, To Do, In Progress, Review, and Done columns
 
-Sprint CRUD, story management, drag-and-drop, charts, and AI provider calls remain out of scope for this issue.
+Story management, drag-and-drop, charts, risk CRUD, and AI provider calls remain out of scope for this issue.
 
 ## Project setup status
 
@@ -107,6 +113,20 @@ Issue #10 adds initial project CRUD foundation:
 Project form fields are `name`, `project_key`, `description`, `status`, `start_date`, and `target_end_date`. The current implementation assumes the Supabase cloud schema includes these Issue #10 columns.
 
 If project creation returns a missing `project_key`, `start_date`, or `target_end_date` message, update the Supabase cloud `public.projects` table before retesting project creation.
+
+## Sprint setup status
+
+Issue #12 adds initial sprint CRUD foundation:
+
+- Project workspaces read sprints from `public.sprints` where `project_id` matches the current project route.
+- `/projects/[projectId]/sprints/new` validates sprint input with Zod and creates rows in `public.sprints`.
+- Sprint creation sets `project_id` from the route parameter and relies on Supabase RLS to confirm the authenticated user can access that project.
+- Successful sprint creation redirects to `/projects/[projectId]/sprints/[sprintId]`.
+- The dashboard active sprint count is read from Supabase when available.
+
+Sprint form fields are `name`, `goal`, `start_date`, `end_date`, and `status`. The current implementation assumes the Supabase cloud schema includes these Issue #12 columns.
+
+If sprint creation or listing returns a missing `start_date` or `end_date` message, update the Supabase cloud `public.sprints` table before retesting sprint workflows.
 
 ## Environment variables
 

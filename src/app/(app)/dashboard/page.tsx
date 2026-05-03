@@ -39,7 +39,14 @@ export default async function DashboardPage() {
   const { count: projectCount } = await supabase
     .from("projects")
     .select("id", { count: "exact", head: true });
-  const summaryCards = getDashboardSummaryCards(projectCount ?? 0);
+  const { count: activeSprintCount } = await supabase
+    .from("sprints")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "active");
+  const summaryCards = getDashboardSummaryCards(
+    projectCount ?? 0,
+    activeSprintCount ?? 0,
+  );
 
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
