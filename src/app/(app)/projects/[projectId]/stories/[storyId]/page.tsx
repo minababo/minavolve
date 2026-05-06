@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   CheckSquare,
   ClipboardList,
+  Columns3,
   Flag,
   Gauge,
   MessageSquareText,
@@ -142,6 +143,14 @@ export default async function StoryDetailPage({
               </span>
             </div>
           </header>
+
+          <Link
+            href={`/projects/${typedProject.id}/kanban`}
+            className="inline-flex w-fit items-center gap-2 rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+          >
+            <Columns3 className="size-4" />
+            Open Kanban board
+          </Link>
 
           <section className="grid gap-5 md:grid-cols-4">
             {[

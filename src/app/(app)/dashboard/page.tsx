@@ -167,7 +167,7 @@ export default async function DashboardPage() {
                 id="kanban-preview"
                 eyebrow="Board"
                 title="Kanban preview"
-                description="The board is intentionally static in this issue. Drag-and-drop and persistence come later."
+                description="Project workspaces now include a read-only Kanban board grouped by story status. This dashboard preview remains static; drag-and-drop and status updates come later."
               >
                 <KanbanPreview />
               </DashboardSection>
