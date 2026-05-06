@@ -5,11 +5,18 @@ import {
   CalendarDays,
   ClipboardList,
   Columns3,
+  MessageSquarePlus,
+  MessageSquareText,
   Target,
 } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 
 import { AppSidebar } from "@/components/app/app-sidebar";
+import {
+  StoryCard,
+  type StoryCardStory,
+} from "@/components/stories/story-card";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
 
 export const metadata: Metadata = {
@@ -41,6 +48,21 @@ type SprintDetail = {
   created_at: string;
   updated_at: string;
 };
+
+function getStoryListError(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("acceptance_criteria") ||
+    normalized.includes("story_points") ||
+    normalized.includes("schema cache") ||
+    normalized.includes("column")
+  ) {
+    return "The user_stories table is missing Issue #14 story columns. Apply the latest Supabase schema before listing stories.";
+  }
+
+  return "Unable to load stories for this sprint right now.";
+}
 
 function formatDate(date: string | null) {
   if (!date) {
@@ -90,6 +112,18 @@ export default async function SprintDetailPage({
 
   const typedProject = project as SprintProject;
   const typedSprint = sprint as SprintDetail;
+  const { data: stories, error: storiesError } = await supabase
+    .from("user_stories")
+    .select(
+      "id,project_id,sprint_id,title,description,acceptance_criteria,story_points,priority,status,created_at",
+    )
+    .eq("project_id", projectId)
+    .eq("sprint_id", sprintId)
+    .order("created_at", { ascending: false });
+  const storyRows = ((stories ?? []) as StoryCardStory[]).map((story) => ({
+    ...story,
+    sprint_name: typedSprint.name,
+  }));
 
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
@@ -122,7 +156,7 @@ export default async function SprintDetailPage({
                   </h1>
                   <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
                     {typedSprint.goal ??
-                      "No sprint goal yet. User stories, Kanban cards, and delivery metrics will be connected in later issues."}
+                      "No sprint goal yet. Linked user stories can now appear below when assigned to this sprint."}
                   </p>
                 </div>
               </div>
@@ -177,9 +211,62 @@ export default async function SprintDetailPage({
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
               This placeholder confirms project-scoped sprint routing and RLS
-              reads. User story CRUD, Kanban data, drag-and-drop, charts, risks,
-              and AI actions remain out of scope for Issue #12.
+              reads. Story listing is available below; Kanban data,
+              drag-and-drop, charts, risks, and AI actions remain out of scope
+              for Issue #14.
             </p>
+          </section>
+
+          <section className="rounded-[2rem] border border-white/80 bg-white/88 p-5 shadow-[0_25px_80px_-55px_rgba(15,23,42,0.72)] backdrop-blur sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-brand">
+                  Sprint backlog
+                </p>
+                <h2 className="mt-2 font-heading text-2xl font-semibold text-slate-950">
+                  Linked stories
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                  Stories shown here are scoped to this project and assigned to
+                  this sprint.
+                </p>
+              </div>
+              <Button
+                asChild
+                size="lg"
+                className="h-10 rounded-2xl bg-slate-950 px-4 text-white hover:bg-slate-800"
+              >
+                <Link href={`/projects/${typedProject.id}/stories/new`}>
+                  <MessageSquarePlus className="size-4" />
+                  New story
+                </Link>
+              </Button>
+            </div>
+
+            {storiesError ? (
+              <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-800">
+                {getStoryListError(storiesError.message)}
+              </div>
+            ) : storyRows.length > 0 ? (
+              <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {storyRows.map((story) => (
+                  <StoryCard key={story.id} story={story} />
+                ))}
+              </div>
+            ) : (
+              <div className="mt-6 rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50/80 p-6 text-center">
+                <div className="mx-auto inline-flex size-12 items-center justify-center rounded-2xl bg-brand-soft text-brand">
+                  <MessageSquareText className="size-6" />
+                </div>
+                <h3 className="mt-4 font-heading text-2xl font-semibold text-slate-950">
+                  No stories linked to this sprint
+                </h3>
+                <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">
+                  Create a story from the project workspace and choose this
+                  sprint to link it here.
+                </p>
+              </div>
+            )}
           </section>
         </div>
       </div>
