@@ -133,7 +133,7 @@ export default async function StoryDetailPage({
                   </h1>
                   <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
                     {typedStory.description ??
-                      "No story description yet. Kanban movement and story editing will be added in later issues."}
+                      "No story description yet. Use the Kanban board to move this story through the workflow."}
                   </p>
                 </div>
               </div>

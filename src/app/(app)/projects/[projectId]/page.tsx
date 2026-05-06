@@ -171,7 +171,7 @@ export default async function ProjectWorkspacePage({
                   </h1>
                   <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
                     {typedProject.description ??
-                      "No project description yet. Project editing, sprint setup, and board data will be implemented in later issues."}
+                      "No project description yet. Project editing and richer sprint setup will be implemented in later issues."}
                   </p>
                 </div>
               </div>
@@ -276,8 +276,8 @@ export default async function ProjectWorkspacePage({
                   </h3>
                   <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">
                     Create the first sprint for this project. User stories,
-                    Kanban data, risks, charts, and AI support will connect to
-                    sprints in later issues.
+                    Kanban movement, risks, charts, and AI support can connect
+                    to sprint context as the workflow matures.
                   </p>
                   <Button
                     asChild
@@ -356,9 +356,8 @@ export default async function ProjectWorkspacePage({
                   No stories yet
                 </h3>
                 <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">
-                  Create the first user story for this project. Kanban movement,
-                  drag-and-drop, risks, charts, and AI support will connect to
-                  stories in later issues.
+                  Create the first user story for this project. The Kanban board
+                  can move stories by status once cards exist.
                 </p>
                 <Button
                   asChild

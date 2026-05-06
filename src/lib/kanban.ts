@@ -44,6 +44,8 @@ export type KanbanColumnModel = KanbanColumnConfig & {
   stories: KanbanStory[];
 };
 
+const kanbanColumnIdPrefix = "kanban-column:";
+
 export const kanbanColumnConfig: KanbanColumnConfig[] = [
   {
     status: "backlog",
@@ -98,21 +100,35 @@ export function isKanbanStatus(status: string): status is KanbanStatus {
   return kanbanStatuses.includes(status as KanbanStatus);
 }
 
+export function getKanbanColumnId(status: KanbanStatus) {
+  return `${kanbanColumnIdPrefix}${status}`;
+}
+
+export function getKanbanStatusFromColumnId(id: string) {
+  const rawStatus = id.startsWith(kanbanColumnIdPrefix)
+    ? id.slice(kanbanColumnIdPrefix.length)
+    : "";
+
+  return isKanbanStatus(rawStatus) ? rawStatus : null;
+}
+
+export function compareKanbanStories(a: KanbanStory, b: KanbanStory) {
+  const sortA = a.sort_order ?? 0;
+  const sortB = b.sort_order ?? 0;
+
+  if (sortA !== sortB) {
+    return sortA - sortB;
+  }
+
+  return a.created_at.localeCompare(b.created_at);
+}
+
 export function buildKanbanColumns(stories: KanbanStory[]): KanbanColumnModel[] {
   return kanbanColumnConfig.map((column) => ({
     ...column,
     stories: stories
       .filter((story) => story.status === column.status)
-      .sort((a, b) => {
-        const sortA = a.sort_order ?? 0;
-        const sortB = b.sort_order ?? 0;
-
-        if (sortA !== sortB) {
-          return sortA - sortB;
-        }
-
-        return a.created_at.localeCompare(b.created_at);
-      }),
+      .sort(compareKanbanStories),
   }));
 }
 

@@ -326,7 +326,7 @@ export const riskRegisterItems: RiskItem[] = [
     owner: "Auth",
   },
   {
-    label: "Kanban ordering depends on later drag-and-drop persistence.",
+    label: "Kanban ordering depends on RLS-backed story movement.",
     severity: "High",
     owner: "Board",
   },
@@ -378,7 +378,7 @@ export const dashboardFocusItems = [
   },
   {
     label: "Project CRUD foundation",
-    detail: "Projects, sprints, stories, and read-only Kanban boards use Supabase RLS.",
+    detail: "Projects, sprints, stories, and drag-and-drop Kanban boards use Supabase RLS.",
     Icon: Gauge,
   },
   {

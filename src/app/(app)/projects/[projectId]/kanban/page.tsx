@@ -7,7 +7,6 @@ import { AppSidebar } from "@/components/app/app-sidebar";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { Button } from "@/components/ui/button";
 import {
-  buildKanbanColumns,
   getStoryStatusSummary,
   isKanbanStatus,
   type KanbanStory,
@@ -134,7 +133,6 @@ export default async function ProjectKanbanPage({ params }: KanbanPageProps) {
         ];
       });
 
-  const columns = buildKanbanColumns(kanbanStories);
   const summary = getStoryStatusSummary(kanbanStories);
 
   return (
@@ -167,9 +165,9 @@ export default async function ProjectKanbanPage({ params }: KanbanPageProps) {
                     Kanban board
                   </h1>
                   <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                    A read-only board for {typedProject.name}. Stories are
-                    grouped by status; drag-and-drop and status updates are
-                    intentionally out of scope for this issue.
+                    An interactive board for {typedProject.name}. Drag story
+                    cards between columns to update status while preserving
+                    project-scoped Supabase RLS access.
                   </p>
                 </div>
               </div>
@@ -217,7 +215,10 @@ export default async function ProjectKanbanPage({ params }: KanbanPageProps) {
           ) : null}
 
           <section className="rounded-[2rem] border border-white/80 bg-white/88 p-4 shadow-[0_25px_80px_-55px_rgba(15,23,42,0.72)] backdrop-blur sm:p-5">
-            <KanbanBoard columns={columns} />
+            <KanbanBoard
+              projectId={typedProject.id}
+              initialStories={kanbanStories}
+            />
           </section>
         </div>
       </div>

@@ -1,6 +1,6 @@
 # Minavolve
 
-Minavolve is an Agile sprint board product concept with room for an AI assistant. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, initial Supabase-backed project/sprint/user story creation and listing, and a basic read-only Kanban board that later issues can extend with drag-and-drop interactions and AI workflows.
+Minavolve is an Agile sprint board product concept with room for an AI assistant. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, initial Supabase-backed project/sprint/user story creation and listing, and a drag-and-drop Kanban board that persists story status and order.
 
 ## What this issue includes
 
@@ -13,7 +13,7 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
 - Authenticated project listing, project creation, and a basic project workspace placeholder backed by Supabase RLS
 - Project-scoped sprint listing, sprint creation, and a basic sprint workspace placeholder backed by Supabase RLS
 - Project-scoped user story listing, story creation, optional sprint assignment, and a basic story workspace placeholder backed by Supabase RLS
-- Project-scoped read-only Kanban board grouped by user story status
+- Project-scoped drag-and-drop Kanban board grouped by user story status
 - Starter environment variable documentation in `.env.example`
 - Initial Supabase schema migration for projects, sprints, stories, risks, AI generations, activity, memberships, and profiles
 
@@ -22,7 +22,7 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
 - No project editing or deletion
 - No sprint editing or deletion
 - No user story editing or deletion
-- No drag-and-drop board behavior or Kanban status updates
+- No story editing, deletion, or assignee workflows from the Kanban board
 - No charts or risk register CRUD
 - No AI API routes or provider integration
 
@@ -103,9 +103,9 @@ Current dashboard content is intentionally static:
 
 - Summary cards for projects, active sprints, user stories, and open risks. Project, active sprint, and user story counts are read from Supabase when available.
 - Placeholder sections for recent projects, sprint planning, Kanban preview, risk register, delivery analytics, and AI assistant
-- A visual Kanban preview with Backlog, To Do, In Progress, Review, and Done columns. Project workspaces also include a read-only Kanban board backed by user stories.
+- A visual Kanban preview with Backlog, To Do, In Progress, Review, and Done columns. Project workspaces also include a drag-and-drop Kanban board backed by user stories.
 
-Drag-and-drop, Kanban movement, charts, risk CRUD, and AI provider calls remain out of scope for this issue.
+Charts, risk CRUD, and AI provider calls remain out of scope for this issue.
 
 ## Project setup status
 
@@ -153,15 +153,18 @@ If story creation or listing returns a missing `acceptance_criteria` or `story_p
 
 ## Kanban board status
 
-Issue #16 adds a basic project-specific Kanban board:
+Issue #18 adds drag-and-drop movement to the project-specific Kanban board:
 
 - `/projects/[projectId]/kanban` reads user stories from `public.user_stories` for the current project.
 - Stories are grouped into Backlog, To Do, In Progress, Review, and Done columns based on `status`.
 - Cards show title, priority, story points, status, sprint name when linked, and acceptance criteria count.
+- Dragging a card between columns updates `public.user_stories.status`.
+- The board persists target-column ordering through `public.user_stories.sort_order`.
+- The move server action verifies the authenticated user, project access, story ownership by `project_id`, and valid Kanban status values before updating Supabase.
 - Project workspaces link to the Kanban board, and story detail pages link back to the board.
 - Empty columns show clear empty states.
 
-The board is read-only. Drag-and-drop, sort persistence, and status updates remain out of scope for this issue.
+The board intentionally does not implement story editing, deletion, charts, risk workflows, or AI provider calls.
 
 The implementation assumes `public.user_stories.status` and `public.user_stories.sort_order` already exist, as defined in the initial schema, and also uses the Issue #14 story fields such as `acceptance_criteria` and `story_points` for card metadata.
 
