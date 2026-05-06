@@ -1,6 +1,6 @@
 # Minavolve
 
-Minavolve is an Agile sprint board product concept with room for an AI assistant. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, and initial Supabase-backed project, sprint, and user story creation/listing that later issues can extend with drag-and-drop interactions and AI workflows.
+Minavolve is an Agile sprint board product concept with room for an AI assistant. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, initial Supabase-backed project/sprint/user story creation and listing, and a basic read-only Kanban board that later issues can extend with drag-and-drop interactions and AI workflows.
 
 ## What this issue includes
 
@@ -13,6 +13,7 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
 - Authenticated project listing, project creation, and a basic project workspace placeholder backed by Supabase RLS
 - Project-scoped sprint listing, sprint creation, and a basic sprint workspace placeholder backed by Supabase RLS
 - Project-scoped user story listing, story creation, optional sprint assignment, and a basic story workspace placeholder backed by Supabase RLS
+- Project-scoped read-only Kanban board grouped by user story status
 - Starter environment variable documentation in `.env.example`
 - Initial Supabase schema migration for projects, sprints, stories, risks, AI generations, activity, memberships, and profiles
 
@@ -21,7 +22,7 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
 - No project editing or deletion
 - No sprint editing or deletion
 - No user story editing or deletion
-- No drag-and-drop board behavior
+- No drag-and-drop board behavior or Kanban status updates
 - No charts or risk register CRUD
 - No AI API routes or provider integration
 
@@ -69,6 +70,7 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
    - `http://localhost:3000/projects/new`
    - `http://localhost:3000/projects/[projectId]/sprints/new`
    - `http://localhost:3000/projects/[projectId]/stories/new`
+   - `http://localhost:3000/projects/[projectId]/kanban`
 
 ## Linting
 
@@ -91,6 +93,7 @@ npm run lint
 - `/projects/[projectId]/sprints/[sprintId]`: protected sprint workspace placeholder
 - `/projects/[projectId]/stories/new`: protected user story creation form
 - `/projects/[projectId]/stories/[storyId]`: protected user story workspace placeholder
+- `/projects/[projectId]/kanban`: protected project-specific Kanban board grouped by story status
 
 ## Dashboard status
 
@@ -100,7 +103,7 @@ Current dashboard content is intentionally static:
 
 - Summary cards for projects, active sprints, user stories, and open risks. Project, active sprint, and user story counts are read from Supabase when available.
 - Placeholder sections for recent projects, sprint planning, Kanban preview, risk register, delivery analytics, and AI assistant
-- A visual Kanban preview with Backlog, To Do, In Progress, Review, and Done columns
+- A visual Kanban preview with Backlog, To Do, In Progress, Review, and Done columns. Project workspaces also include a read-only Kanban board backed by user stories.
 
 Drag-and-drop, Kanban movement, charts, risk CRUD, and AI provider calls remain out of scope for this issue.
 
@@ -147,6 +150,20 @@ Issue #14 adds initial user story CRUD foundation:
 Story form fields are `title`, `description`, `acceptance_criteria`, `story_points`, `priority`, `status`, and optional `sprint_id`. The current implementation assumes the Supabase cloud schema includes these Issue #14 columns.
 
 If story creation or listing returns a missing `acceptance_criteria` or `story_points` message, update the Supabase cloud `public.user_stories` table before retesting story workflows.
+
+## Kanban board status
+
+Issue #16 adds a basic project-specific Kanban board:
+
+- `/projects/[projectId]/kanban` reads user stories from `public.user_stories` for the current project.
+- Stories are grouped into Backlog, To Do, In Progress, Review, and Done columns based on `status`.
+- Cards show title, priority, story points, status, sprint name when linked, and acceptance criteria count.
+- Project workspaces link to the Kanban board, and story detail pages link back to the board.
+- Empty columns show clear empty states.
+
+The board is read-only. Drag-and-drop, sort persistence, and status updates remain out of scope for this issue.
+
+The implementation assumes `public.user_stories.status` and `public.user_stories.sort_order` already exist, as defined in the initial schema, and also uses the Issue #14 story fields such as `acceptance_criteria` and `story_points` for card metadata.
 
 ## Environment variables
 

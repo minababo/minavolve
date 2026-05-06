@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   CalendarDays,
   ClipboardList,
+  Columns3,
   FolderKanban,
   MessageSquarePlus,
   MessageSquareText,
@@ -175,9 +176,21 @@ export default async function ProjectWorkspacePage({
                 </div>
               </div>
 
-              <span className="h-fit rounded-full bg-brand-soft px-4 py-2 text-sm font-semibold capitalize text-brand">
-                {typedProject.status}
-              </span>
+              <div className="flex flex-col gap-3 sm:flex-row xl:items-center">
+                <span className="h-fit rounded-full bg-brand-soft px-4 py-2 text-sm font-semibold capitalize text-brand">
+                  {typedProject.status}
+                </span>
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-10 rounded-2xl bg-slate-950 px-4 text-white hover:bg-slate-800"
+                >
+                  <Link href={`/projects/${typedProject.id}/kanban`}>
+                    <Columns3 className="size-4" />
+                    Kanban board
+                  </Link>
+                </Button>
+              </div>
             </div>
           </header>
 
@@ -195,7 +208,7 @@ export default async function ProjectWorkspacePage({
               },
               {
                 label: "Workspace status",
-                value: "Placeholder",
+                value: "Kanban ready",
                 Icon: FolderKanban,
               },
             ].map((item) => (

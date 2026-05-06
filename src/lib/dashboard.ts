@@ -378,7 +378,7 @@ export const dashboardFocusItems = [
   },
   {
     label: "Project CRUD foundation",
-    detail: "Projects, sprints, and stories can be created through Supabase RLS.",
+    detail: "Projects, sprints, stories, and read-only Kanban boards use Supabase RLS.",
     Icon: Gauge,
   },
   {
