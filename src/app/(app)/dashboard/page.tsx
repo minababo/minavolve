@@ -43,9 +43,13 @@ export default async function DashboardPage() {
     .from("sprints")
     .select("id", { count: "exact", head: true })
     .eq("status", "active");
+  const { count: userStoryCount } = await supabase
+    .from("user_stories")
+    .select("id", { count: "exact", head: true });
   const summaryCards = getDashboardSummaryCards(
     projectCount ?? 0,
     activeSprintCount ?? 0,
+    userStoryCount ?? 0,
   );
 
   return (

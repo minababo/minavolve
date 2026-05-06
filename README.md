@@ -1,6 +1,6 @@
 # Minavolve
 
-Minavolve is an Agile sprint board product concept with room for an AI assistant. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, and initial Supabase-backed project and sprint creation/listing that later issues can extend with stories, drag-and-drop interactions, and AI workflows.
+Minavolve is an Agile sprint board product concept with room for an AI assistant. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, and initial Supabase-backed project, sprint, and user story creation/listing that later issues can extend with drag-and-drop interactions and AI workflows.
 
 ## What this issue includes
 
@@ -12,6 +12,7 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
 - Authenticated dashboard layout with sidebar navigation, top bar, static summary metrics, placeholder work sections, and a five-column Kanban preview
 - Authenticated project listing, project creation, and a basic project workspace placeholder backed by Supabase RLS
 - Project-scoped sprint listing, sprint creation, and a basic sprint workspace placeholder backed by Supabase RLS
+- Project-scoped user story listing, story creation, optional sprint assignment, and a basic story workspace placeholder backed by Supabase RLS
 - Starter environment variable documentation in `.env.example`
 - Initial Supabase schema migration for projects, sprints, stories, risks, AI generations, activity, memberships, and profiles
 
@@ -19,7 +20,7 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
 
 - No project editing or deletion
 - No sprint editing or deletion
-- No user story CRUD
+- No user story editing or deletion
 - No drag-and-drop board behavior
 - No charts or risk register CRUD
 - No AI API routes or provider integration
@@ -67,6 +68,7 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
    - `http://localhost:3000/projects`
    - `http://localhost:3000/projects/new`
    - `http://localhost:3000/projects/[projectId]/sprints/new`
+   - `http://localhost:3000/projects/[projectId]/stories/new`
 
 ## Linting
 
@@ -87,6 +89,8 @@ npm run lint
 - `/projects/[projectId]`: protected project workspace with project-scoped sprint list
 - `/projects/[projectId]/sprints/new`: protected sprint creation form
 - `/projects/[projectId]/sprints/[sprintId]`: protected sprint workspace placeholder
+- `/projects/[projectId]/stories/new`: protected user story creation form
+- `/projects/[projectId]/stories/[storyId]`: protected user story workspace placeholder
 
 ## Dashboard status
 
@@ -94,11 +98,11 @@ Issue #8 adds the authenticated dashboard shell. The page keeps the existing ser
 
 Current dashboard content is intentionally static:
 
-- Summary cards for projects, active sprints, user stories, and open risks. Project and active sprint counts are read from Supabase when available.
+- Summary cards for projects, active sprints, user stories, and open risks. Project, active sprint, and user story counts are read from Supabase when available.
 - Placeholder sections for recent projects, sprint planning, Kanban preview, risk register, delivery analytics, and AI assistant
 - A visual Kanban preview with Backlog, To Do, In Progress, Review, and Done columns
 
-Story management, drag-and-drop, charts, risk CRUD, and AI provider calls remain out of scope for this issue.
+Drag-and-drop, Kanban movement, charts, risk CRUD, and AI provider calls remain out of scope for this issue.
 
 ## Project setup status
 
@@ -127,6 +131,22 @@ Issue #12 adds initial sprint CRUD foundation:
 Sprint form fields are `name`, `goal`, `start_date`, `end_date`, and `status`. The current implementation assumes the Supabase cloud schema includes these Issue #12 columns.
 
 If sprint creation or listing returns a missing `start_date` or `end_date` message, update the Supabase cloud `public.sprints` table before retesting sprint workflows.
+
+## User story setup status
+
+Issue #14 adds initial user story CRUD foundation:
+
+- Project workspaces read stories from `public.user_stories` where `project_id` matches the current project route.
+- `/projects/[projectId]/stories/new` validates story input with Zod and creates rows in `public.user_stories`.
+- Story creation sets `project_id` from the route parameter and can optionally set `sprint_id` to a sprint that belongs to the current project.
+- Acceptance criteria are stored as a text array by splitting the multiline textarea into trimmed non-empty lines.
+- Successful story creation redirects to `/projects/[projectId]/stories/[storyId]`.
+- Sprint detail pages show stories linked to that sprint when the schema supports the Issue #14 fields.
+- The dashboard user story count is read from Supabase when available.
+
+Story form fields are `title`, `description`, `acceptance_criteria`, `story_points`, `priority`, `status`, and optional `sprint_id`. The current implementation assumes the Supabase cloud schema includes these Issue #14 columns.
+
+If story creation or listing returns a missing `acceptance_criteria` or `story_points` message, update the Supabase cloud `public.user_stories` table before retesting story workflows.
 
 ## Environment variables
 

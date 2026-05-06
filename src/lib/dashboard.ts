@@ -130,9 +130,9 @@ export const dashboardSummaryCards: DashboardSummaryCard[] = [
   },
   {
     label: "User stories",
-    value: "28",
-    detail: "Placeholder backlog volume for the future board.",
-    trend: "9 shaped for next sprint",
+    value: "0",
+    detail: "Supabase user stories visible to the current user.",
+    trend: "Create stories from a project workspace",
     tone: "amber",
     Icon: MessageSquareText,
   },
@@ -149,6 +149,7 @@ export const dashboardSummaryCards: DashboardSummaryCard[] = [
 export function getDashboardSummaryCards(
   projectCount: number,
   activeSprintCount = 0,
+  userStoryCount = 0,
 ) {
   return dashboardSummaryCards.map((card) => {
     if (card.label === "Projects") {
@@ -170,6 +171,17 @@ export function getDashboardSummaryCards(
           activeSprintCount === 1
             ? "1 active sprint available through RLS"
             : `${activeSprintCount} active sprints available through RLS`,
+      };
+    }
+
+    if (card.label === "User stories") {
+      return {
+        ...card,
+        value: String(userStoryCount),
+        trend:
+          userStoryCount === 1
+            ? "1 story available through RLS"
+            : `${userStoryCount} stories available through RLS`,
       };
     }
 
@@ -366,7 +378,7 @@ export const dashboardFocusItems = [
   },
   {
     label: "Project CRUD foundation",
-    detail: "Projects and sprints can be created through Supabase RLS.",
+    detail: "Projects, sprints, and stories can be created through Supabase RLS.",
     Icon: Gauge,
   },
   {

@@ -5,6 +5,8 @@ import {
   CalendarDays,
   ClipboardList,
   FolderKanban,
+  MessageSquarePlus,
+  MessageSquareText,
   Plus,
   ShieldAlert,
   TimerReset,
@@ -16,6 +18,10 @@ import {
   SprintCard,
   type SprintCardSprint,
 } from "@/components/sprints/sprint-card";
+import {
+  StoryCard,
+  type StoryCardStory,
+} from "@/components/stories/story-card";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
 
@@ -55,6 +61,21 @@ function getSprintListError(message: string) {
   }
 
   return "Unable to load sprints for this project right now.";
+}
+
+function getStoryListError(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (
+    normalized.includes("acceptance_criteria") ||
+    normalized.includes("story_points") ||
+    normalized.includes("schema cache") ||
+    normalized.includes("column")
+  ) {
+    return "The user_stories table is missing Issue #14 story columns. Apply the latest Supabase schema before listing stories.";
+  }
+
+  return "Unable to load stories for this project right now.";
 }
 
 function formatDate(date: string | null) {
@@ -101,6 +122,22 @@ export default async function ProjectWorkspacePage({
     .eq("project_id", projectId)
     .order("created_at", { ascending: false });
   const sprintRows = (sprints ?? []) as SprintCardSprint[];
+  const sprintNameById = new Map(
+    sprintRows.map((sprint) => [sprint.id, sprint.name]),
+  );
+  const { data: stories, error: storiesError } = await supabase
+    .from("user_stories")
+    .select(
+      "id,project_id,sprint_id,title,description,acceptance_criteria,story_points,priority,status,created_at",
+    )
+    .eq("project_id", projectId)
+    .order("created_at", { ascending: false });
+  const storyRows = ((stories ?? []) as StoryCardStory[]).map((story) => ({
+    ...story,
+    sprint_name: story.sprint_id
+      ? (sprintNameById.get(story.sprint_id) ?? "Sprint unavailable")
+      : null,
+  }));
 
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
@@ -259,6 +296,69 @@ export default async function ProjectWorkspacePage({
                 trigger when a project is inserted.
               </div>
             </article>
+          </section>
+
+          <section className="rounded-[2rem] border border-white/80 bg-white/88 p-5 shadow-[0_25px_80px_-55px_rgba(15,23,42,0.72)] backdrop-blur sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-brand">
+                  Backlog
+                </p>
+                <h2 className="mt-2 font-heading text-2xl font-semibold text-slate-950">
+                  User stories
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                  Stories are scoped to this project and can optionally be
+                  assigned to one of the project sprints.
+                </p>
+              </div>
+              <Button
+                asChild
+                size="lg"
+                className="h-10 rounded-2xl bg-slate-950 px-4 text-white hover:bg-slate-800"
+              >
+                <Link href={`/projects/${typedProject.id}/stories/new`}>
+                  <MessageSquarePlus className="size-4" />
+                  New story
+                </Link>
+              </Button>
+            </div>
+
+            {storiesError ? (
+              <div className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-800">
+                {getStoryListError(storiesError.message)}
+              </div>
+            ) : storyRows.length > 0 ? (
+              <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {storyRows.map((story) => (
+                  <StoryCard key={story.id} story={story} />
+                ))}
+              </div>
+            ) : (
+              <div className="mt-6 rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50/80 p-6 text-center">
+                <div className="mx-auto inline-flex size-12 items-center justify-center rounded-2xl bg-brand-soft text-brand">
+                  <MessageSquareText className="size-6" />
+                </div>
+                <h3 className="mt-4 font-heading text-2xl font-semibold text-slate-950">
+                  No stories yet
+                </h3>
+                <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">
+                  Create the first user story for this project. Kanban movement,
+                  drag-and-drop, risks, charts, and AI support will connect to
+                  stories in later issues.
+                </p>
+                <Button
+                  asChild
+                  size="lg"
+                  className="mt-6 h-11 rounded-2xl bg-slate-950 px-5 text-white hover:bg-slate-800"
+                >
+                  <Link href={`/projects/${typedProject.id}/stories/new`}>
+                    <MessageSquarePlus className="size-4" />
+                    Create first story
+                  </Link>
+                </Button>
+              </div>
+            )}
           </section>
         </div>
       </div>
