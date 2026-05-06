@@ -167,7 +167,7 @@ export default async function DashboardPage() {
                 id="kanban-preview"
                 eyebrow="Board"
                 title="Kanban preview"
-                description="Project workspaces now include a read-only Kanban board grouped by story status. This dashboard preview remains static; drag-and-drop and status updates come later."
+                description="Project workspaces now include a drag-and-drop Kanban board that persists story status and order through Supabase. This dashboard preview remains static."
               >
                 <KanbanPreview />
               </DashboardSection>
