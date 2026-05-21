@@ -1,11 +1,71 @@
-import { kanbanColumns } from "@/lib/dashboard";
 import { cn } from "@/lib/utils";
+
+type KanbanCard = {
+  title: string;
+  meta: string;
+  tag: string;
+};
+
+type KanbanColumn = {
+  title: string;
+  count: string;
+  accentClass: string;
+  cards: KanbanCard[];
+};
+
+const columns: KanbanColumn[] = [
+  {
+    title: "Backlog",
+    count: "8",
+    accentClass: "bg-slate-200 text-slate-700",
+    cards: [
+      { title: "Define project empty state", meta: "UX copy - product", tag: "Ready" },
+      { title: "Map profile defaults", meta: "Auth handoff - backend", tag: "Needs review" },
+    ],
+  },
+  {
+    title: "To Do",
+    count: "5",
+    accentClass: "bg-blue-100 text-blue-800",
+    cards: [
+      { title: "Create sprint planning route", meta: "App shell - frontend", tag: "Next" },
+      { title: "Draft risk severity labels", meta: "Domain model - product", tag: "Queued" },
+    ],
+  },
+  {
+    title: "In Progress",
+    count: "3",
+    accentClass: "bg-cyan-100 text-cyan-900",
+    cards: [
+      { title: "Dashboard layout foundation", meta: "Issue #8 - frontend", tag: "Active" },
+      { title: "Auth smoke test notes", meta: "Supabase - QA", tag: "Blocked" },
+    ],
+  },
+  {
+    title: "Review",
+    count: "2",
+    accentClass: "bg-amber-100 text-amber-900",
+    cards: [
+      { title: "README auth setup", meta: "Docs - reviewer", tag: "PR" },
+      { title: "Dashboard copy pass", meta: "Design - product", tag: "QA" },
+    ],
+  },
+  {
+    title: "Done",
+    count: "6",
+    accentClass: "bg-emerald-100 text-emerald-900",
+    cards: [
+      { title: "Supabase SSR clients", meta: "Auth - platform", tag: "Shipped" },
+      { title: "Protected dashboard route", meta: "Security - app", tag: "Shipped" },
+    ],
+  },
+];
 
 export function KanbanPreview() {
   return (
     <div className="overflow-x-auto pb-2">
       <div className="grid min-w-[980px] grid-cols-5 gap-4">
-        {kanbanColumns.map((column) => (
+        {columns.map((column) => (
           <section
             key={column.title}
             className="rounded-[1.5rem] border border-slate-200 bg-slate-50/90 p-3"

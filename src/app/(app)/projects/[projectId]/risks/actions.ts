@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { riskFormSchema } from "@/lib/validators/risk";
+import { riskFormSchema, riskStatuses } from "@/lib/validators/risk";
 import { createClient } from "@/utils/supabase/server";
 
 function getString(formData: FormData, key: string) {
@@ -114,5 +114,46 @@ export async function createRisk(formData: FormData) {
   revalidatePath(`/projects/${projectId}`);
   revalidatePath(`/projects/${projectId}/risks`);
 
+  redirect(`/projects/${projectId}/risks`);
+}
+
+export async function updateRiskStatus(formData: FormData) {
+  const riskId = getString(formData, "riskId");
+  const projectId = getString(formData, "projectId");
+  const newStatus = getString(formData, "newStatus");
+
+  if (!riskId || !projectId) {
+    redirect("/projects");
+  }
+
+  if (!(riskStatuses as readonly string[]).includes(newStatus)) {
+    redirect(
+      `/projects/${projectId}/risks?error=${encodeURIComponent("Invalid status value.")}`,
+    );
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { error } = await supabase
+    .from("risks")
+    .update({ status: newStatus })
+    .eq("id", riskId)
+    .eq("project_id", projectId);
+
+  if (error) {
+    redirect(
+      `/projects/${projectId}/risks?error=${encodeURIComponent("Unable to update risk status.")}`,
+    );
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/projects/${projectId}/risks`);
   redirect(`/projects/${projectId}/risks`);
 }

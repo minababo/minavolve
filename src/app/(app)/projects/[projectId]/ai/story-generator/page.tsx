@@ -3,9 +3,10 @@ import Link from "next/link";
 import { ArrowLeft, Bot, Sparkles } from "lucide-react";
 
 import { getStoryGeneratorProject } from "@/app/(app)/projects/[projectId]/ai/story-generator/actions";
-import { AppSidebar } from "@/components/app/app-sidebar";
+import { AppNav } from "@/components/app/app-nav";
 import { UserStoryGeneratorForm } from "@/components/ai/user-story-generator-form";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/utils/supabase/server";
 
 export const metadata: Metadata = {
   title: "AI user story generator",
@@ -21,17 +22,18 @@ type StoryGeneratorPageProps = {
 export default async function StoryGeneratorPage({
   params,
 }: StoryGeneratorPageProps) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { projectId } = await params;
   const project = await getStoryGeneratorProject(projectId);
 
   return (
-    <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-[1540px] flex-col gap-6 lg:flex-row">
-        <div className="lg:w-72 lg:shrink-0">
-          <AppSidebar activeHref="/projects" />
-        </div>
-
-        <div className="min-w-0 flex-1 space-y-6">
+    <>
+      <AppNav userEmail={user?.email ?? ""} />
+      <main className="flex-1 px-4 pb-8 pt-12 sm:px-6 lg:px-8 lg:pt-16">
+        <div className="mx-auto w-full max-w-6xl space-y-6">
           <Link
             href={`/projects/${project.id}`}
             className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
@@ -77,7 +79,7 @@ export default async function StoryGeneratorPage({
 
           <UserStoryGeneratorForm projectId={project.id} />
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
