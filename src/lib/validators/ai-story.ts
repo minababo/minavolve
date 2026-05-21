@@ -63,3 +63,25 @@ export const generatedUserStorySchema = z.object({
 });
 
 export type AiStoryGeneratorValues = z.infer<typeof aiStoryGeneratorSchema>;
+
+export const aiCriteriaGeneratorSchema = z.object({
+  projectId: z.uuid("Select a valid project."),
+  storyTitle: z
+    .string()
+    .trim()
+    .min(10, "Story title must be at least 10 characters.")
+    .max(180, "Story title must be 180 characters or fewer."),
+  storyContext: z.preprocess(
+    normalizeOptionalText,
+    z.string().max(800, "Context must be 800 characters or fewer.").nullable(),
+  ),
+});
+
+export const generatedCriteriaSchema = z.object({
+  acceptance_criteria: z
+    .array(z.string().trim().min(3).max(400))
+    .min(3, "At least 3 acceptance criteria are required.")
+    .max(8, "Too many acceptance criteria returned."),
+});
+
+export type AiCriteriaGeneratorValues = z.infer<typeof aiCriteriaGeneratorSchema>;

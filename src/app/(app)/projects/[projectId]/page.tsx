@@ -6,6 +6,7 @@ import {
   ClipboardList,
   Columns3,
   FolderKanban,
+  ListChecks,
   MessageSquarePlus,
   MessageSquareText,
   Plus,
@@ -196,6 +197,18 @@ export default async function ProjectWorkspacePage({
                 <Button
                   asChild
                   size="lg"
+                  className="h-10 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 text-cyan-950 hover:bg-cyan-100"
+                >
+                  <Link
+                    href={`/projects/${typedProject.id}/ai/acceptance-criteria`}
+                  >
+                    <ListChecks className="size-4" />
+                    AI criteria generator
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
                   className="h-10 rounded-2xl bg-slate-950 px-4 text-white hover:bg-slate-800"
                 >
                   <Link href={`/projects/${typedProject.id}/kanban`}>
@@ -350,6 +363,18 @@ export default async function ProjectWorkspacePage({
                   >
                     <Sparkles className="size-4" />
                     Generate story
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-10 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 text-cyan-950 hover:bg-cyan-100"
+                >
+                  <Link
+                    href={`/projects/${typedProject.id}/ai/acceptance-criteria`}
+                  >
+                    <ListChecks className="size-4" />
+                    Generate criteria
                   </Link>
                 </Button>
                 <Button

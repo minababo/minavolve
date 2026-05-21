@@ -7,6 +7,7 @@ import {
   Columns3,
   Flag,
   Gauge,
+  ListChecks,
   MessageSquareText,
 } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
@@ -144,13 +145,22 @@ export default async function StoryDetailPage({
             </div>
           </header>
 
-          <Link
-            href={`/projects/${typedProject.id}/kanban`}
-            className="inline-flex w-fit items-center gap-2 rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
-          >
-            <Columns3 className="size-4" />
-            Open Kanban board
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href={`/projects/${typedProject.id}/kanban`}
+              className="inline-flex w-fit items-center gap-2 rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-800"
+            >
+              <Columns3 className="size-4" />
+              Open Kanban board
+            </Link>
+            <Link
+              href={`/projects/${typedProject.id}/ai/acceptance-criteria`}
+              className="inline-flex w-fit items-center gap-2 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-2.5 text-sm font-semibold text-cyan-950 transition-colors hover:bg-cyan-100"
+            >
+              <ListChecks className="size-4" />
+              Generate acceptance criteria
+            </Link>
+          </div>
 
           <section className="grid gap-5 md:grid-cols-4">
             {[

@@ -234,7 +234,7 @@ export default async function DashboardPage() {
                 id="ai-assistant"
                 eyebrow="Assistant"
                 title="AI assistant"
-                description="Project workspaces now include an AI user story generator that calls OpenAI from a protected server route and logs successful generations."
+                description="Project workspaces include an AI user story generator and an AI acceptance criteria generator. Both call Groq from a protected server route and log successful generations."
                 dark
               >
                 <div className="space-y-3">
