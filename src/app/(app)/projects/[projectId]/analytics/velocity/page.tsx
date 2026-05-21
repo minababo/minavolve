@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, BarChart3, Plus } from "lucide-react";
+import { ArrowLeft, BarChart3, Plus, TrendingDown } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 
 import { AppSidebar } from "@/components/app/app-sidebar";
@@ -103,16 +103,28 @@ export default async function VelocityPage({ params }: VelocityPageProps) {
                 </div>
               </div>
 
-              <Button
-                asChild
-                size="lg"
-                className="h-10 rounded-2xl bg-slate-950 px-4 text-white hover:bg-slate-800"
-              >
-                <Link href={`/projects/${project.id}/sprints/new`}>
-                  <Plus className="size-4" />
-                  New sprint
-                </Link>
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-10 rounded-2xl border border-slate-200 bg-white px-4 text-slate-950 hover:bg-slate-50"
+                >
+                  <Link href={`/projects/${project.id}/analytics/burndown`}>
+                    <TrendingDown className="size-4" />
+                    Burndown
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-10 rounded-2xl bg-slate-950 px-4 text-white hover:bg-slate-800"
+                >
+                  <Link href={`/projects/${project.id}/sprints/new`}>
+                    <Plus className="size-4" />
+                    New sprint
+                  </Link>
+                </Button>
+              </div>
             </div>
           </header>
 

@@ -206,7 +206,7 @@ export default async function DashboardPage() {
                 id="delivery-analytics"
                 eyebrow="Analytics"
                 title="Delivery analytics"
-                description="Sprint velocity charts are available in project workspaces. This dashboard section keeps static KPI tiles."
+                description="Sprint velocity and burndown charts are available in project workspaces. This dashboard section keeps static KPI tiles."
               >
                 <div className="grid gap-3">
                   {analyticsHighlights.map((item) => (

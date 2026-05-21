@@ -1,6 +1,6 @@
 # Minavolve
 
-Minavolve is an Agile sprint board product concept with an AI-assisted backlog workflow. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, initial Supabase-backed project/sprint/user story creation and listing, a drag-and-drop Kanban board that persists story status and order, an AI user story generator, an AI acceptance criteria generator, and a sprint velocity chart for project workspaces.
+Minavolve is an Agile sprint board product concept with an AI-assisted backlog workflow. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, initial Supabase-backed project/sprint/user story creation and listing, a drag-and-drop Kanban board that persists story status and order, an AI user story generator, an AI acceptance criteria generator, a sprint velocity chart, and a sprint burndown chart for project workspaces.
 
 ## What this issue includes
 
@@ -17,6 +17,7 @@ Minavolve is an Agile sprint board product concept with an AI-assisted backlog w
 - Project-scoped AI user story generator backed by a protected server API route
 - Project-scoped AI acceptance criteria generator backed by a protected server API route
 - Project-scoped sprint velocity chart showing completed story points per sprint
+- Project-scoped sprint burndown chart with ideal and actual lines, sprint selector, and summary tiles
 - Starter environment variable documentation in `.env.example`
 - Initial Supabase schema migration for projects, sprints, stories, risks, AI generations, activity, memberships, and profiles
 
@@ -102,6 +103,7 @@ npm run lint
 - `/projects/[projectId]/ai/story-generator`: protected AI user story generator
 - `/projects/[projectId]/ai/acceptance-criteria`: protected AI acceptance criteria generator
 - `/projects/[projectId]/analytics/velocity`: protected sprint velocity chart
+- `/projects/[projectId]/analytics/burndown`: protected sprint burndown chart
 
 ## Dashboard status
 
@@ -225,6 +227,28 @@ Issue #24 adds a project-scoped sprint velocity chart:
 - No migration is needed — the chart reads from existing `public.sprints` and `public.user_stories` fields.
 
 The chart intentionally does not implement burndown, cumulative flow, or risk analytics.
+
+## Sprint burndown chart status
+
+Issue #26 adds a project-scoped sprint burndown chart:
+
+- `/projects/[projectId]/analytics/burndown` is protected by the existing Supabase server-side user check.
+- All sprints for the project are fetched to populate a sprint selector dropdown in the header.
+- The page defaults to the most recently created sprint when no `sprintId` query param is present.
+- The sprint selector is a `"use client"` component that pushes a `?sprintId=` query param via `useRouter` to switch sprints without a full navigation.
+- Data is aggregated server-side using `buildBurndownData` in `src/lib/charts.ts` — no client-side data fetching.
+- The `BurndownChart` component is a `"use client"` Recharts `LineChart` with two series: Actual (solid blue) and Ideal (dashed grey).
+- The Ideal line is a straight line from total sprint story points on day 1 to zero on the last day of the sprint.
+- The Actual line uses a simplified model: linear interpolation from total points at sprint start to remaining points at the current date (or sprint end if past). Future days are omitted.
+- A custom tooltip shows date, ideal points, and actual points on hover.
+- A legend labels both series.
+- A clear empty state appears when the selected sprint has no start or end date.
+- Summary tiles show total points, remaining points, and completion percentage when the sprint has stories.
+- The burndown page links back to the velocity chart and to the project workspace.
+- The burndown page is linked from the project workspace header as a Burndown button and from the velocity page header.
+- No migration is needed — the chart reads from existing `public.sprints` and `public.user_stories` fields.
+
+The chart intentionally does not implement day-level completion tracking, cumulative flow, or risk analytics.
 
 ## Environment variables
 

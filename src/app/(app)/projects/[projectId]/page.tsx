@@ -14,6 +14,7 @@ import {
   ShieldAlert,
   Sparkles,
   TimerReset,
+  TrendingDown,
 } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 
@@ -217,6 +218,18 @@ export default async function ProjectWorkspacePage({
                   >
                     <BarChart3 className="size-4" />
                     Velocity
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-10 rounded-2xl border border-slate-200 bg-white px-4 text-slate-950 hover:bg-slate-50"
+                >
+                  <Link
+                    href={`/projects/${typedProject.id}/analytics/burndown`}
+                  >
+                    <TrendingDown className="size-4" />
+                    Burndown
                   </Link>
                 </Button>
                 <Button
