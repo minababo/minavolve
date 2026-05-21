@@ -1,3 +1,4 @@
+import { updateRiskStatus } from "@/app/(app)/projects/[projectId]/risks/actions";
 import { cn } from "@/lib/utils";
 import { riskScore } from "@/lib/validators/risk";
 
@@ -35,9 +36,31 @@ const ratingLabels: Record<string, string> = {
   high: "High",
 };
 
-export function RiskCard({ risk }: { risk: RiskCardRisk }) {
+type NextStatus = { label: string; value: string };
+
+function getNextStatuses(currentStatus: string): NextStatus[] {
+  if (currentStatus === "open") {
+    return [{ label: "Mark as mitigating", value: "mitigating" }];
+  }
+  if (currentStatus === "mitigating") {
+    return [
+      { label: "Mark as resolved", value: "resolved" },
+      { label: "Mark as accepted", value: "accepted" },
+    ];
+  }
+  return [{ label: "Reopen", value: "open" }];
+}
+
+export function RiskCard({
+  risk,
+  projectId,
+}: {
+  risk: RiskCardRisk;
+  projectId: string;
+}) {
   const score = riskScore(risk.likelihood, risk.impact);
   const severity = getRiskSeverity(score);
+  const nextStatuses = getNextStatuses(risk.status);
 
   return (
     <article className="rounded-[1.75rem] border border-white/80 bg-white/88 p-5 shadow-[0_24px_70px_-55px_rgba(15,23,42,0.72)]">
@@ -91,6 +114,22 @@ export function RiskCard({ risk }: { risk: RiskCardRisk }) {
             {ratingLabels[risk.impact] ?? risk.impact}
           </p>
         </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
+        {nextStatuses.map((next) => (
+          <form key={next.value} action={updateRiskStatus}>
+            <input type="hidden" name="riskId" value={risk.id} />
+            <input type="hidden" name="projectId" value={projectId} />
+            <input type="hidden" name="newStatus" value={next.value} />
+            <button
+              type="submit"
+              className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950"
+            >
+              {next.label}
+            </button>
+          </form>
+        ))}
       </div>
     </article>
   );

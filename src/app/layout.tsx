@@ -58,7 +58,7 @@ export default function RootLayout({
       lang="en"
       className={`${bodyFont.variable} ${headingFont.variable} ${monoFont.variable} h-full`}
     >
-      <body className="min-h-full bg-background text-foreground antialiased">
+      <body className="flex min-h-dvh flex-col bg-background text-foreground antialiased">
         {children}
       </body>
     </html>

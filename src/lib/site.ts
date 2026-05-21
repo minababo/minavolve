@@ -173,23 +173,23 @@ export const sprintBoardPreview: PreviewColumn[] = [
 
 export const roadmapItems: RoadmapItem[] = [
   {
-    label: "Realtime auth",
+    label: "Supabase Auth",
     detail:
-      "Wire login and registration to Supabase auth, then protect the dashboard with session-aware routing.",
+      "Login, registration, and session management via Supabase, with server-side auth guards and RLS-enforced data access across every route.",
   },
   {
-    label: "Persistent sprint data",
+    label: "Project & sprint CRUD",
     detail:
-      "Replace placeholder cards with board data, sprint metadata, and team-specific project structure.",
+      "Full create, read, and delete for projects, sprints, and user stories persisted in Supabase with row-level security.",
   },
   {
-    label: "Drag-and-drop flow",
+    label: "Drag-and-drop Kanban",
     detail:
-      "Turn the static board shell into a working kanban experience with sortable cards and column movement.",
+      "Per-project Kanban boards with real drag-and-drop story movement, column state, and position persistence through Supabase.",
   },
   {
-    label: "AI assistant actions",
+    label: "AI story generation",
     detail:
-      "Connect the assistant panel to provider-backed prompts for summaries, risks, and sprint ceremony support.",
+      "Groq-powered user story drafting and acceptance criteria generation from a protected server route, with per-project audit logging.",
   },
 ];

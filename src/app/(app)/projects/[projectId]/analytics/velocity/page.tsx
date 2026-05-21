@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, BarChart3, Plus, TrendingDown } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 
-import { AppSidebar } from "@/components/app/app-sidebar";
+import { AppNav } from "@/components/app/app-nav";
 import { VelocityChart } from "@/components/charts/velocity-chart";
 import { Button } from "@/components/ui/button";
 import { buildVelocityData } from "@/lib/charts";
@@ -67,13 +67,10 @@ export default async function VelocityPage({ params }: VelocityPageProps) {
       : "—";
 
   return (
-    <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-[1540px] flex-col gap-6 lg:flex-row">
-        <div className="lg:w-72 lg:shrink-0">
-          <AppSidebar activeHref="/projects" />
-        </div>
-
-        <div className="min-w-0 flex-1 space-y-6">
+    <>
+      <AppNav userEmail={user.email ?? ""} />
+      <main className="flex-1 px-4 pb-8 pt-12 sm:px-6 lg:px-8 lg:pt-16">
+        <div className="mx-auto w-full max-w-6xl space-y-6">
           <Link
             href={`/projects/${project.id}`}
             className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition-colors hover:text-slate-950"
@@ -174,7 +171,7 @@ export default async function VelocityPage({ params }: VelocityPageProps) {
             <VelocityChart data={velocityData} />
           </section>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }

@@ -1,29 +1,53 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { CheckCircle2, Plus } from "lucide-react";
 import { redirect } from "next/navigation";
 
-import { logout } from "@/app/(app)/dashboard/actions";
-import { AppSidebar } from "@/components/app/app-sidebar";
-import { AppTopbar } from "@/components/app/app-topbar";
+import { AppNav } from "@/components/app/app-nav";
 import { DashboardCard } from "@/components/app/dashboard-card";
 import { DashboardSection } from "@/components/app/dashboard-section";
-import { KanbanPreview } from "@/components/app/kanban-preview";
 import { Button } from "@/components/ui/button";
-import {
-  analyticsHighlights,
-  assistantPrompts,
-  getDashboardSummaryCards,
-  recentProjects,
-  riskRegisterItems,
-  sprintPlanningItems,
-} from "@/lib/dashboard";
+import { getDashboardSummaryCards } from "@/lib/dashboard";
+import { cn } from "@/lib/utils";
+import { riskScore } from "@/lib/validators/risk";
 import { createClient } from "@/utils/supabase/server";
 
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "Authenticated Minavolve dashboard layout.",
 };
+
+type LatestProject = {
+  id: string;
+  name: string;
+  project_key: string;
+  status: string | null;
+  created_at: string;
+};
+
+type ActiveRiskDashboard = {
+  id: string;
+  project_id: string;
+  title: string;
+  likelihood: string;
+  impact: string;
+  status: string;
+  projects: { name: string; project_key: string } | null;
+};
+
+function getSeverityLabel(score: number): string {
+  if (score === 9) return "Critical";
+  if (score >= 6) return "High";
+  if (score >= 3) return "Medium";
+  return "Low";
+}
+
+function getSeverityBadgeClass(score: number): string {
+  if (score === 9) return "bg-rose-100 text-rose-800";
+  if (score >= 6) return "bg-orange-100 text-orange-800";
+  if (score >= 3) return "bg-amber-100 text-amber-800";
+  return "bg-emerald-100 text-emerald-800";
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -35,28 +59,39 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const userEmail = user.email ?? "Authenticated user";
   const [
     { count: projectCount },
     { count: activeSprintCount },
     { count: userStoryCount },
     { count: openRiskCount },
+    { data: latestProjectsData },
+    { data: activeRisksData },
   ] = await Promise.all([
-    supabase
-      .from("projects")
-      .select("id", { count: "exact", head: true }),
+    supabase.from("projects").select("id", { count: "exact", head: true }),
     supabase
       .from("sprints")
       .select("id", { count: "exact", head: true })
       .eq("status", "active"),
-    supabase
-      .from("user_stories")
-      .select("id", { count: "exact", head: true }),
+    supabase.from("user_stories").select("id", { count: "exact", head: true }),
     supabase
       .from("risks")
       .select("id", { count: "exact", head: true })
       .eq("status", "open"),
+    supabase
+      .from("projects")
+      .select("id, name, project_key, status, created_at")
+      .order("created_at", { ascending: false })
+      .limit(3),
+    supabase
+      .from("risks")
+      .select(
+        "id, project_id, title, likelihood, impact, status, projects(name, project_key)",
+      )
+      .in("status", ["open", "mitigating"])
+      .order("created_at", { ascending: false })
+      .limit(5),
   ]);
+
   const summaryCards = getDashboardSummaryCards(
     projectCount ?? 0,
     activeSprintCount ?? 0,
@@ -64,16 +99,15 @@ export default async function DashboardPage() {
     openRiskCount ?? 0,
   );
 
+  const projects = (latestProjectsData ?? []) as LatestProject[];
+  const activeRisks =
+    (activeRisksData ?? []) as unknown as ActiveRiskDashboard[];
+
   return (
-    <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-[1540px] flex-col gap-6 lg:flex-row">
-        <div className="lg:w-72 lg:shrink-0">
-          <AppSidebar />
-        </div>
-
-        <div className="min-w-0 flex-1 space-y-6">
-          <AppTopbar userEmail={userEmail} onLogout={logout} />
-
+    <>
+      <AppNav userEmail={user.email ?? ""} />
+      <main className="flex-1 px-4 pb-8 pt-12 sm:px-6 lg:px-8 lg:pt-16">
+        <div className="mx-auto w-full max-w-6xl space-y-6">
           <section
             className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
             aria-label="Dashboard summary"
@@ -92,183 +126,128 @@ export default async function DashboardPage() {
           </section>
 
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.75fr)]">
-            <div className="space-y-6">
-              <DashboardSection
-                id="recent-projects"
-                eyebrow="Portfolio"
-                title="Recent projects"
-                description="Project CRUD is now available. This dashboard section still keeps a lightweight planning preview until richer project activity lands."
-                action={
-                  <Button
-                    asChild
-                    size="lg"
-                    className="h-10 rounded-2xl bg-slate-950 px-4 text-white hover:bg-slate-800"
-                  >
-                    <Link href="/projects/new">
-                      <Plus className="size-4" />
-                      New project
-                    </Link>
-                  </Button>
-                }
-              >
+            {/* Section A: Recent projects */}
+            <DashboardSection
+              id="recent-projects"
+              eyebrow="Portfolio"
+              title="Recent projects"
+              description="Your most recently created projects. Full project management is available in each workspace."
+              action={
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-10 rounded-2xl bg-slate-950 px-4 text-white hover:bg-slate-800"
+                >
+                  <Link href="/projects/new">
+                    <Plus className="size-4" />
+                    New project
+                  </Link>
+                </Button>
+              }
+            >
+              {projects.length > 0 ? (
                 <div className="grid gap-3">
-                  {recentProjects.map((project) => (
-                    <article
-                      key={project.code}
-                      className="grid gap-4 rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4 md:grid-cols-[0.65fr_1fr_auto]"
+                  {projects.map((project) => (
+                    <Link
+                      key={project.id}
+                      href={`/projects/${project.id}`}
+                      className="group grid gap-4 rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4 transition-colors hover:border-slate-300 hover:bg-white md:grid-cols-[auto_1fr_auto]"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="inline-flex size-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 font-heading text-sm font-semibold text-white">
-                          {project.code}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-slate-950">
-                            {project.name}
-                          </h3>
-                          <p className="text-sm text-slate-500">
-                            {project.status}
-                          </p>
-                        </div>
+                      <div className="inline-flex size-11 shrink-0 items-center justify-center rounded-2xl bg-slate-950 font-heading text-sm font-semibold text-white">
+                        {project.project_key}
                       </div>
-                      <p className="text-sm leading-6 text-slate-600">
-                        {project.focus}
-                      </p>
-                      <span className="h-fit rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-800">
-                        {project.health}
-                      </span>
-                    </article>
-                  ))}
-                </div>
-              </DashboardSection>
-
-              <DashboardSection
-                id="sprint-planning"
-                eyebrow="Planning"
-                title="Sprint planning"
-                description="A non-interactive planning snapshot for scope, capacity, and review readiness."
-              >
-                <div className="grid gap-4 md:grid-cols-3">
-                  {sprintPlanningItems.map((item) => (
-                    <article
-                      key={item.label}
-                      className="rounded-[1.5rem] border border-slate-200 bg-white p-4"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <h3 className="font-semibold text-slate-950">
-                          {item.label}
-                        </h3>
-                        <span className="font-mono text-sm text-brand">
-                          {item.progress}
-                        </span>
-                      </div>
-                      <div className="mt-4 h-2 rounded-full bg-slate-100">
-                        <div
-                          className="h-full rounded-full bg-brand"
-                          style={{ width: item.progress }}
-                        />
-                      </div>
-                      <p className="mt-4 text-sm leading-6 text-slate-600">
-                        {item.detail}
-                      </p>
-                    </article>
-                  ))}
-                </div>
-              </DashboardSection>
-
-              <DashboardSection
-                id="kanban-preview"
-                eyebrow="Board"
-                title="Kanban preview"
-                description="Project workspaces now include a drag-and-drop Kanban board that persists story status and order through Supabase. This dashboard preview remains static."
-              >
-                <KanbanPreview />
-              </DashboardSection>
-            </div>
-
-            <div className="space-y-6">
-              <DashboardSection
-                id="risk-register"
-                eyebrow="Risk"
-                title="Risk register"
-                description="Delivery risks are mocked until project and activity data are available."
-              >
-                <div className="space-y-3">
-                  {riskRegisterItems.map((risk) => (
-                    <article
-                      key={risk.label}
-                      className="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-4"
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">
-                          {risk.severity}
-                        </span>
-                        <span className="text-xs font-medium text-slate-500">
-                          {risk.owner}
-                        </span>
-                      </div>
-                      <p className="mt-3 text-sm leading-6 text-slate-700">
-                        {risk.label}
-                      </p>
-                    </article>
-                  ))}
-                </div>
-              </DashboardSection>
-
-              <DashboardSection
-                id="delivery-analytics"
-                eyebrow="Analytics"
-                title="Delivery analytics"
-                description="Sprint velocity and burndown charts are available in project workspaces. This dashboard section keeps static KPI tiles."
-              >
-                <div className="grid gap-3">
-                  {analyticsHighlights.map((item) => (
-                    <article
-                      key={item.label}
-                      className="rounded-[1.5rem] border border-slate-200 bg-white p-4"
-                    >
-                      <div className="flex items-baseline justify-between gap-4">
-                        <h3 className="font-semibold text-slate-700">
-                          {item.label}
-                        </h3>
-                        <p className="font-heading text-3xl font-semibold text-slate-950">
-                          {item.value}
+                      <div>
+                        <p className="font-semibold text-slate-950">
+                          {project.name}
+                        </p>
+                        <p className="mt-0.5 text-sm capitalize text-slate-500">
+                          {project.status ?? "active"}
                         </p>
                       </div>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">
-                        {item.detail}
-                      </p>
-                    </article>
+                      <span className="hidden self-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 transition-colors group-hover:border-slate-300 md:inline-block">
+                        Open →
+                      </span>
+                    </Link>
                   ))}
                 </div>
-              </DashboardSection>
-
-              <DashboardSection
-                id="ai-assistant"
-                eyebrow="Assistant"
-                title="AI assistant"
-                description="Project workspaces include an AI user story generator and an AI acceptance criteria generator. Both call Groq from a protected server route and log successful generations."
-                dark
-              >
-                <div className="space-y-3">
-                  {assistantPrompts.map((prompt) => (
-                    <article
-                      key={prompt.label}
-                      className="rounded-[1.5rem] border border-white/10 bg-white/[0.06] p-4"
+              ) : (
+                <div className="rounded-[1.5rem] border border-dashed border-slate-200 bg-slate-50/80 p-6 text-center">
+                  <p className="text-sm text-slate-600">
+                    No projects yet.{" "}
+                    <Link
+                      href="/projects/new"
+                      className="font-medium text-brand underline-offset-2 hover:underline"
                     >
-                      <p className="font-semibold text-white">
-                        {prompt.label}
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-slate-300">
-                        {prompt.detail}
-                      </p>
-                    </article>
-                  ))}
+                      Create your first project
+                    </Link>{" "}
+                    to get started.
+                  </p>
                 </div>
-              </DashboardSection>
-            </div>
+              )}
+            </DashboardSection>
+
+            {/* Section B: Active risks */}
+            <DashboardSection
+              id="active-risks"
+              eyebrow="Risk"
+              title="Active risks"
+              description="Open and mitigating delivery risks across your projects."
+            >
+              {activeRisks.length > 0 ? (
+                <div className="space-y-2">
+                  {activeRisks.map((risk) => {
+                    const score = riskScore(risk.likelihood, risk.impact);
+                    return (
+                      <Link
+                        key={risk.id}
+                        href={`/projects/${risk.project_id}/risks`}
+                        className="flex items-center justify-between gap-3 rounded-[1.25rem] border border-slate-200 bg-slate-50/80 p-3 transition-colors hover:border-slate-300 hover:bg-white"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-slate-950">
+                            {risk.title}
+                          </p>
+                          <p className="mt-0.5 truncate text-xs text-slate-500">
+                            {risk.projects?.name ?? "Unknown project"}
+                          </p>
+                        </div>
+                        <div className="flex shrink-0 flex-col items-end gap-1">
+                          <span
+                            className={cn(
+                              "rounded-full px-2.5 py-1 text-xs font-semibold",
+                              getSeverityBadgeClass(score),
+                            )}
+                          >
+                            {getSeverityLabel(score)}
+                          </span>
+                          <span className="text-xs capitalize text-slate-400">
+                            {risk.status}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                  <div className="pt-1">
+                    <Link
+                      href="/projects"
+                      className="text-xs font-medium text-brand underline-offset-2 hover:underline"
+                    >
+                      View all risks by project →
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2 rounded-[1.25rem] border border-dashed border-emerald-200 bg-emerald-50/50 p-5 text-center">
+                  <CheckCircle2 className="size-5 text-emerald-600" />
+                  <p className="text-sm font-medium text-emerald-800">
+                    No open or mitigating risks — all clear.
+                  </p>
+                </div>
+              )}
+            </DashboardSection>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }

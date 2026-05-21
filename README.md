@@ -9,7 +9,8 @@ Minavolve is an Agile sprint board product concept with an AI-assisted backlog w
 - Shared product copy in `src/lib/site.ts`
 - Reusable marketing components for the landing page
 - Supabase email/password login, registration, logout, and protected dashboard access
-- Authenticated dashboard layout with sidebar navigation, top bar, static summary metrics, placeholder work sections, and a five-column Kanban preview
+- Unified sticky top navigation bar across all authenticated pages replacing the former sidebar and topbar layout
+- Authenticated dashboard with live Supabase-backed summary cards for projects, active sprints, stories, and open risks
 - Authenticated project listing, project creation, and a basic project workspace placeholder backed by Supabase RLS
 - Project-scoped sprint listing, sprint creation, and a basic sprint workspace placeholder backed by Supabase RLS
 - Project-scoped user story listing, story creation, optional sprint assignment, and a basic story workspace placeholder backed by Supabase RLS
@@ -18,7 +19,7 @@ Minavolve is an Agile sprint board product concept with an AI-assisted backlog w
 - Project-scoped AI acceptance criteria generator backed by a protected server API route
 - Project-scoped sprint velocity chart showing completed story points per sprint
 - Project-scoped sprint burndown chart with ideal and actual lines, sprint selector, and summary tiles
-- Project-scoped risk register with risk creation, colour-coded severity scoring, and status tracking
+- Project-scoped risk register with risk creation, colour-coded severity scoring, and inline status update
 - Starter environment variable documentation in `.env.example`
 - Initial Supabase schema migration for projects, sprints, stories, risks, AI generations, activity, memberships, and profiles
 
@@ -28,10 +29,8 @@ Minavolve is an Agile sprint board product concept with an AI-assisted backlog w
 - No sprint editing or deletion
 - No user story editing or deletion
 - No story editing, deletion, or assignee workflows from the Kanban board
-- No burndown chart yet
-- No risk register CRUD yet
 - No story auto-insert from AI output
-- No risk AI workflows
+- No risk editing, deletion, or AI workflows
 
 ## Tech stack
 
@@ -110,15 +109,14 @@ npm run lint
 
 ## Dashboard status
 
-Issue #8 adds the authenticated dashboard shell. The page keeps the existing server-side Supabase user check, shows the signed-in user's email in the top bar, and keeps logout wired through the dashboard server action.
+The dashboard is protected by a server-side Supabase user check and shows the authenticated user's email in the top navigation bar. Logout is wired through the dashboard server action.
 
-Current dashboard content is intentionally static:
+Dashboard content:
 
-- Summary cards for projects, active sprints, user stories, and open risks. Project, active sprint, and user story counts are read from Supabase when available.
-- Placeholder sections for recent projects, sprint planning, Kanban preview, risk register, delivery analytics, and AI assistant
-- A visual Kanban preview with Backlog, To Do, In Progress, Review, and Done columns. Project workspaces also include a drag-and-drop Kanban board backed by user stories.
-
-Charts, risk CRUD, and broader AI assistant workflows remain out of scope for this issue.
+- Summary cards for projects, active sprints, user stories, and open risks — all counts are read live from Supabase RLS.
+- Recent projects section showing the five most recently created projects with quick links to the project workspace, Kanban board, and risk register.
+- A static Kanban preview with Backlog, To Do, In Progress, Review, and Done columns. Full drag-and-drop is available in individual project workspaces.
+- Quick action cards linking to the AI story generator and AI acceptance criteria generator.
 
 ## Project setup status
 
@@ -271,6 +269,18 @@ Issue #28 adds a project-scoped risk register:
 
 The register intentionally does not implement risk editing, deletion, or risk AI workflows.
 
+## UI polish status
+
+Issue #30 replaces the former sidebar-and-topbar authenticated layout with a single unified sticky top navigation bar, aligns all page content to a `max-w-6xl` container, and applies consistent spacing and background treatment across all authenticated routes.
+
+- `AppNav` (`src/components/app/app-nav.tsx`) is a `"use client"` component shared by all authenticated pages. It uses `usePathname()` for active link highlighting, shows the signed-in user's email, and exposes a logout form.
+- The nav matches the marketing site header: `Sparkles` logo mark, site name and tagline, pill-shaped active state, glassmorphism background (`bg-background/80 backdrop-blur-xl`).
+- `app-sidebar.tsx` and `app-topbar.tsx` are removed.
+- All authenticated pages use the `<AppNav>` + `<main className="flex-1 ...">` pattern. The Kanban board page uses a wider `max-w-[1720px]` content container to accommodate the five-column board layout.
+- `src/app/layout.tsx` sets `flex min-h-dvh flex-col` on `<body>` so `<main>` fills the remaining viewport height without leaving empty space below short pages.
+- A subtle dot-grid pattern is applied to `<body>` via CSS `radial-gradient` to give the white background texture without competing with page content.
+- `src/lib/dashboard.ts` no longer exports `dashboardNavItems` or `DashboardNavItem`, which were used only by the deleted sidebar component.
+
 ## Environment variables
 
 Copy `.env.example` to `.env.local` and provide the Supabase cloud project values:
@@ -281,10 +291,9 @@ Copy `.env.example` to `.env.local` and provide the Supabase cloud project value
 
 AI provider variables:
 
-- `OPENAI_API_KEY`
-- `OPENAI_MODEL` (optional, defaults to `gpt-4.1-mini`)
+- `GROQ_API_KEY`
 
-Do not prefix `OPENAI_API_KEY` with `NEXT_PUBLIC_`. It must remain server-only and should be configured in local `.env.local` and deployment environment variables.
+Do not prefix `GROQ_API_KEY` with `NEXT_PUBLIC_`. It is read only on the server inside the `/api/ai/*` route handlers and must never be exposed to client components. Configure it in local `.env.local` and in your deployment environment variables.
 
 ## Supabase Auth setup
 

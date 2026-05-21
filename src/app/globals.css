@@ -79,6 +79,11 @@
   --sidebar-ring: oklch(0.665 0.103 218.4);
 }
 
+body {
+  background-image: radial-gradient(circle, rgba(15, 23, 42, 0.055) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
 .dark {
   --background: oklch(0.19 0.03 250.5);
   --foreground: oklch(0.97 0.01 95.5);

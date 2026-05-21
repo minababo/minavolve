@@ -3,7 +3,7 @@ import Link from "next/link";
 import { FolderKanban, Plus } from "lucide-react";
 import { redirect } from "next/navigation";
 
-import { AppSidebar } from "@/components/app/app-sidebar";
+import { AppNav } from "@/components/app/app-nav";
 import { Button } from "@/components/ui/button";
 import {
   ProjectCard,
@@ -50,13 +50,10 @@ export default async function ProjectsPage() {
   const projects = (data ?? []) as ProjectCardProject[];
 
   return (
-    <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-[1540px] flex-col gap-6 lg:flex-row">
-        <div className="lg:w-72 lg:shrink-0">
-          <AppSidebar activeHref="/projects" />
-        </div>
-
-        <div className="min-w-0 flex-1 space-y-6">
+    <>
+      <AppNav userEmail={user.email ?? ""} />
+      <main className="flex-1 px-4 pb-8 pt-12 sm:px-6 lg:px-8 lg:pt-16">
+        <div className="mx-auto w-full max-w-6xl space-y-6">
           <header className="rounded-[2rem] border border-white/80 bg-white/88 p-5 shadow-[0_25px_80px_-55px_rgba(15,23,42,0.72)] backdrop-blur sm:p-6">
             <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
               <div className="flex items-start gap-4">
@@ -134,7 +131,7 @@ export default async function ProjectsPage() {
             </section>
           )}
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
