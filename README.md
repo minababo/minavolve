@@ -1,6 +1,6 @@
 # Minavolve
 
-Minavolve is an Agile sprint board product concept with an AI-assisted backlog workflow. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, initial Supabase-backed project/sprint/user story creation and listing, a drag-and-drop Kanban board that persists story status and order, an AI user story generator, and an AI acceptance criteria generator for project workspaces.
+Minavolve is an Agile sprint board product concept with an AI-assisted backlog workflow. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, initial Supabase-backed project/sprint/user story creation and listing, a drag-and-drop Kanban board that persists story status and order, an AI user story generator, an AI acceptance criteria generator, and a sprint velocity chart for project workspaces.
 
 ## What this issue includes
 
@@ -16,6 +16,7 @@ Minavolve is an Agile sprint board product concept with an AI-assisted backlog w
 - Project-scoped drag-and-drop Kanban board grouped by user story status
 - Project-scoped AI user story generator backed by a protected server API route
 - Project-scoped AI acceptance criteria generator backed by a protected server API route
+- Project-scoped sprint velocity chart showing completed story points per sprint
 - Starter environment variable documentation in `.env.example`
 - Initial Supabase schema migration for projects, sprints, stories, risks, AI generations, activity, memberships, and profiles
 
@@ -25,9 +26,10 @@ Minavolve is an Agile sprint board product concept with an AI-assisted backlog w
 - No sprint editing or deletion
 - No user story editing or deletion
 - No story editing, deletion, or assignee workflows from the Kanban board
-- No charts or risk register CRUD
+- No burndown chart yet
+- No risk register CRUD yet
 - No story auto-insert from AI output
-- No charts or risk AI workflows
+- No risk AI workflows
 
 ## Tech stack
 
@@ -64,7 +66,6 @@ Minavolve is an Agile sprint board product concept with an AI-assisted backlog w
    ```
 
 4. Open the app in your browser:
-
    - `http://localhost:3000/`
    - `http://localhost:3000/login`
    - `http://localhost:3000/register`
@@ -100,6 +101,7 @@ npm run lint
 - `/projects/[projectId]/kanban`: protected project-specific Kanban board grouped by story status
 - `/projects/[projectId]/ai/story-generator`: protected AI user story generator
 - `/projects/[projectId]/ai/acceptance-criteria`: protected AI acceptance criteria generator
+- `/projects/[projectId]/analytics/velocity`: protected sprint velocity chart
 
 ## Dashboard status
 
@@ -192,7 +194,7 @@ Apply migration `20260503000500_add_user_story_generation_type.sql` in the Supab
 
 ## AI acceptance criteria generator status
 
-Issue #11 adds a project-scoped AI acceptance criteria generator:
+Issue #22 adds a project-scoped AI acceptance criteria generator:
 
 - `/projects/[projectId]/ai/acceptance-criteria` is protected by the existing Supabase server-side user check.
 - The generator accepts a required user story title (minimum 10 characters) plus optional story description or context.
@@ -206,6 +208,23 @@ Issue #11 adds a project-scoped AI acceptance criteria generator:
 The generator intentionally does not insert criteria automatically into existing stories or add broader assistant workflows.
 
 Apply migration `20260503000600_add_acceptance_criteria_generation_type.sql` in the Supabase cloud SQL editor to enable generation logging.
+
+## Sprint velocity chart status
+
+Issue #24 adds a project-scoped sprint velocity chart:
+
+- `/projects/[projectId]/analytics/velocity` is protected by the existing Supabase server-side user check.
+- The page fetches all sprints for the project and all user stories with `status = 'done'`.
+- Data is aggregated server-side using `buildVelocityData` in `src/lib/charts.ts` — no client-side data fetching.
+- The `VelocityChart` component is a `"use client"` Recharts `BarChart` that receives pre-aggregated data.
+- Each bar represents one sprint; the Y-axis shows completed story points.
+- A custom tooltip shows sprint name and point total on hover.
+- A clear empty state appears when no sprint has any Done stories.
+- Summary tiles show sprints tracked, total completed points, and average velocity.
+- The velocity page is linked from the project workspace header as a Velocity button.
+- No migration is needed — the chart reads from existing `public.sprints` and `public.user_stories` fields.
+
+The chart intentionally does not implement burndown, cumulative flow, or risk analytics.
 
 ## Environment variables
 
@@ -262,7 +281,6 @@ The migration is designed for a Supabase cloud project. It creates the public ap
 4. Paste the full SQL into a new query.
 5. Run the query.
 6. Confirm these tables exist in the `public` schema:
-
    - `profiles`
    - `projects`
    - `project_members`

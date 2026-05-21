@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ArrowLeft,
+  BarChart3,
   CalendarDays,
   ClipboardList,
   Columns3,
@@ -204,6 +205,18 @@ export default async function ProjectWorkspacePage({
                   >
                     <ListChecks className="size-4" />
                     AI criteria generator
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-10 rounded-2xl border border-slate-200 bg-white px-4 text-slate-950 hover:bg-slate-50"
+                >
+                  <Link
+                    href={`/projects/${typedProject.id}/analytics/velocity`}
+                  >
+                    <BarChart3 className="size-4" />
+                    Velocity
                   </Link>
                 </Button>
                 <Button
