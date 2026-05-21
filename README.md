@@ -1,6 +1,6 @@
 # Minavolve
 
-Minavolve is an Agile sprint board product concept with an AI-assisted backlog workflow. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, initial Supabase-backed project/sprint/user story creation and listing, a drag-and-drop Kanban board that persists story status and order, an AI user story generator, an AI acceptance criteria generator, a sprint velocity chart, and a sprint burndown chart for project workspaces.
+Minavolve is an Agile sprint board product concept with an AI-assisted backlog workflow. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, initial Supabase-backed project/sprint/user story creation and listing, a drag-and-drop Kanban board that persists story status and order, an AI user story generator, an AI acceptance criteria generator, a sprint velocity chart, a sprint burndown chart, and a project risk register for project workspaces.
 
 ## What this issue includes
 
@@ -18,6 +18,7 @@ Minavolve is an Agile sprint board product concept with an AI-assisted backlog w
 - Project-scoped AI acceptance criteria generator backed by a protected server API route
 - Project-scoped sprint velocity chart showing completed story points per sprint
 - Project-scoped sprint burndown chart with ideal and actual lines, sprint selector, and summary tiles
+- Project-scoped risk register with risk creation, colour-coded severity scoring, and status tracking
 - Starter environment variable documentation in `.env.example`
 - Initial Supabase schema migration for projects, sprints, stories, risks, AI generations, activity, memberships, and profiles
 
@@ -104,6 +105,8 @@ npm run lint
 - `/projects/[projectId]/ai/acceptance-criteria`: protected AI acceptance criteria generator
 - `/projects/[projectId]/analytics/velocity`: protected sprint velocity chart
 - `/projects/[projectId]/analytics/burndown`: protected sprint burndown chart
+- `/projects/[projectId]/risks`: protected project risk register
+- `/projects/[projectId]/risks/new`: protected risk creation form
 
 ## Dashboard status
 
@@ -249,6 +252,24 @@ Issue #26 adds a project-scoped sprint burndown chart:
 - No migration is needed — the chart reads from existing `public.sprints` and `public.user_stories` fields.
 
 The chart intentionally does not implement day-level completion tracking, cumulative flow, or risk analytics.
+
+## Risk register status
+
+Issue #28 adds a project-scoped risk register:
+
+- `/projects/[projectId]/risks` is protected by the existing Supabase server-side user check.
+- `/projects/[projectId]/risks/new` contains a risk creation form validated with Zod before inserting into `public.risks`.
+- Risk form fields are `title` (required, minimum 3 characters), `description` (optional), `probability` (1–5 select), `impact` (1–5 select), `mitigation` (optional), and `status` (open, mitigated, closed — default open).
+- On valid submission, `owner_id` is set to the authenticated user's id and `project_id` from the route parameter.
+- Successful creation redirects to `/projects/[projectId]/risks`.
+- Each risk card shows title, probability/impact ratings, risk score (probability × impact), a colour-coded severity badge, status badge, and mitigation summary when present.
+- Severity badge colours: Low (1–4, green), Medium (5–9, amber), High (10–15, orange), Critical (16–25, red).
+- A clear empty state with an Add risk action appears when no risks exist.
+- The project workspace header now includes a rose-tinted Risks button and an Open risks count tile.
+- The dashboard Open risks summary card now shows the real count from Supabase RLS.
+- No migration is needed — `public.risks` exists from the initial schema migration.
+
+The register intentionally does not implement risk editing, deletion, or risk AI workflows.
 
 ## Environment variables
 
