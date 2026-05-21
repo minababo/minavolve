@@ -234,7 +234,7 @@ export default async function DashboardPage() {
                 id="ai-assistant"
                 eyebrow="Assistant"
                 title="AI assistant"
-                description="The UI reserves space for AI workflows without creating API routes or provider calls."
+                description="Project workspaces now include an AI user story generator that calls OpenAI from a protected server route and logs successful generations."
                 dark
               >
                 <div className="space-y-3">

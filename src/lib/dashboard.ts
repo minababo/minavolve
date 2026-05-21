@@ -357,16 +357,16 @@ export const analyticsHighlights: AnalyticsHighlight[] = [
 
 export const assistantPrompts: AssistantPrompt[] = [
   {
-    label: "Summarize sprint health",
-    detail: "Future AI prompt for risks, blockers, and scope movement.",
+    label: "Generate user story",
+    detail: "Project workspaces can draft structured stories from feature ideas.",
   },
   {
-    label: "Draft standup notes",
-    detail: "Future assistant action for async team updates.",
+    label: "Copy into backlog",
+    detail: "Generated titles, descriptions, points, and criteria are copy-ready.",
   },
   {
-    label: "Find delivery risks",
-    detail: "Future prompt combining board activity and risk history.",
+    label: "Audit generation history",
+    detail: "Successful AI story drafts are logged to Supabase per project.",
   },
 ];
 
@@ -383,7 +383,7 @@ export const dashboardFocusItems = [
   },
   {
     label: "AI-ready surface",
-    detail: "Assistant space is designed, but no provider calls are made.",
+    detail: "Project workspaces can generate AI user story drafts through a protected server route.",
     Icon: Sparkles,
   },
 ];

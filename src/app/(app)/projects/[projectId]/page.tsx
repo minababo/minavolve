@@ -10,6 +10,7 @@ import {
   MessageSquareText,
   Plus,
   ShieldAlert,
+  Sparkles,
   TimerReset,
 } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
@@ -183,6 +184,18 @@ export default async function ProjectWorkspacePage({
                 <Button
                   asChild
                   size="lg"
+                  className="h-10 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 text-cyan-950 hover:bg-cyan-100"
+                >
+                  <Link
+                    href={`/projects/${typedProject.id}/ai/story-generator`}
+                  >
+                    <Sparkles className="size-4" />
+                    AI story generator
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
                   className="h-10 rounded-2xl bg-slate-950 px-4 text-white hover:bg-slate-800"
                 >
                   <Link href={`/projects/${typedProject.id}/kanban`}>
@@ -322,19 +335,34 @@ export default async function ProjectWorkspacePage({
                 </h2>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
                   Stories are scoped to this project and can optionally be
-                  assigned to one of the project sprints.
+                  assigned to one of the project sprints. Use the AI generator
+                  to draft copy-ready story fields from a feature idea.
                 </p>
               </div>
-              <Button
-                asChild
-                size="lg"
-                className="h-10 rounded-2xl bg-slate-950 px-4 text-white hover:bg-slate-800"
-              >
-                <Link href={`/projects/${typedProject.id}/stories/new`}>
-                  <MessageSquarePlus className="size-4" />
-                  New story
-                </Link>
-              </Button>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-10 rounded-2xl border border-cyan-200 bg-cyan-50 px-4 text-cyan-950 hover:bg-cyan-100"
+                >
+                  <Link
+                    href={`/projects/${typedProject.id}/ai/story-generator`}
+                  >
+                    <Sparkles className="size-4" />
+                    Generate story
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-10 rounded-2xl bg-slate-950 px-4 text-white hover:bg-slate-800"
+                >
+                  <Link href={`/projects/${typedProject.id}/stories/new`}>
+                    <MessageSquarePlus className="size-4" />
+                    New story
+                  </Link>
+                </Button>
+              </div>
             </div>
 
             {storiesError ? (
@@ -356,19 +384,34 @@ export default async function ProjectWorkspacePage({
                   No stories yet
                 </h3>
                 <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">
-                  Create the first user story for this project. The Kanban board
+                  Create the first user story for this project, or use the AI
+                  generator to draft one from a feature idea. The Kanban board
                   can move stories by status once cards exist.
                 </p>
-                <Button
-                  asChild
-                  size="lg"
-                  className="mt-6 h-11 rounded-2xl bg-slate-950 px-5 text-white hover:bg-slate-800"
-                >
-                  <Link href={`/projects/${typedProject.id}/stories/new`}>
-                    <MessageSquarePlus className="size-4" />
-                    Create first story
-                  </Link>
-                </Button>
+                <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="h-11 rounded-2xl border border-cyan-200 bg-cyan-50 px-5 text-cyan-950 hover:bg-cyan-100"
+                  >
+                    <Link
+                      href={`/projects/${typedProject.id}/ai/story-generator`}
+                    >
+                      <Sparkles className="size-4" />
+                      Generate first story
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="h-11 rounded-2xl bg-slate-950 px-5 text-white hover:bg-slate-800"
+                  >
+                    <Link href={`/projects/${typedProject.id}/stories/new`}>
+                      <MessageSquarePlus className="size-4" />
+                      Create first story
+                    </Link>
+                  </Button>
+                </div>
               </div>
             )}
           </section>
