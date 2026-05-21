@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, MessageSquarePlus } from "lucide-react";
+import { ArrowLeft, MessageSquarePlus, Sparkles } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 
 import { AppSidebar } from "@/components/app/app-sidebar";
@@ -8,6 +8,7 @@ import {
   StoryForm,
   type StorySprintOption,
 } from "@/components/stories/story-form";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/server";
 
 export const metadata: Metadata = {
@@ -113,6 +114,30 @@ export default async function NewStoryPage({
               backlog story without selecting a sprint.
             </div>
           ) : null}
+
+          <section className="flex flex-col gap-4 rounded-[2rem] border border-cyan-200/80 bg-cyan-50/80 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-800">
+                AI draft available
+              </p>
+              <p className="mt-2 text-sm leading-6 text-cyan-950">
+                Need a starting point? Generate a copy-ready story draft, then
+                paste the fields into this manual form.
+              </p>
+            </div>
+            <Button
+              asChild
+              size="lg"
+              className="h-10 rounded-2xl bg-slate-950 px-4 text-white hover:bg-slate-800"
+            >
+              <Link
+                href={`/projects/${typedProject.id}/ai/story-generator`}
+              >
+                <Sparkles className="size-4" />
+                Generate with AI
+              </Link>
+            </Button>
+          </section>
 
           <StoryForm
             projectId={typedProject.id}

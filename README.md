@@ -1,6 +1,6 @@
 # Minavolve
 
-Minavolve is an Agile sprint board product concept with room for an AI assistant. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, initial Supabase-backed project/sprint/user story creation and listing, and a drag-and-drop Kanban board that persists story status and order.
+Minavolve is an Agile sprint board product concept with an AI-assisted backlog workflow. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, initial Supabase-backed project/sprint/user story creation and listing, a drag-and-drop Kanban board that persists story status and order, and an AI user story generator for project workspaces.
 
 ## What this issue includes
 
@@ -14,6 +14,7 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
 - Project-scoped sprint listing, sprint creation, and a basic sprint workspace placeholder backed by Supabase RLS
 - Project-scoped user story listing, story creation, optional sprint assignment, and a basic story workspace placeholder backed by Supabase RLS
 - Project-scoped drag-and-drop Kanban board grouped by user story status
+- Project-scoped AI user story generator backed by a protected server API route
 - Starter environment variable documentation in `.env.example`
 - Initial Supabase schema migration for projects, sprints, stories, risks, AI generations, activity, memberships, and profiles
 
@@ -24,7 +25,7 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
 - No user story editing or deletion
 - No story editing, deletion, or assignee workflows from the Kanban board
 - No charts or risk register CRUD
-- No AI API routes or provider integration
+- No acceptance criteria-only generator, story auto-insert, charts, or risk AI workflows
 
 ## Tech stack
 
@@ -71,6 +72,7 @@ Minavolve is an Agile sprint board product concept with room for an AI assistant
    - `http://localhost:3000/projects/[projectId]/sprints/new`
    - `http://localhost:3000/projects/[projectId]/stories/new`
    - `http://localhost:3000/projects/[projectId]/kanban`
+   - `http://localhost:3000/projects/[projectId]/ai/story-generator`
 
 ## Linting
 
@@ -94,6 +96,7 @@ npm run lint
 - `/projects/[projectId]/stories/new`: protected user story creation form
 - `/projects/[projectId]/stories/[storyId]`: protected user story workspace placeholder
 - `/projects/[projectId]/kanban`: protected project-specific Kanban board grouped by story status
+- `/projects/[projectId]/ai/story-generator`: protected AI user story generator
 
 ## Dashboard status
 
@@ -105,7 +108,7 @@ Current dashboard content is intentionally static:
 - Placeholder sections for recent projects, sprint planning, Kanban preview, risk register, delivery analytics, and AI assistant
 - A visual Kanban preview with Backlog, To Do, In Progress, Review, and Done columns. Project workspaces also include a drag-and-drop Kanban board backed by user stories.
 
-Charts, risk CRUD, and AI provider calls remain out of scope for this issue.
+Charts, risk CRUD, and broader AI assistant workflows remain out of scope for this issue.
 
 ## Project setup status
 
@@ -164,9 +167,25 @@ Issue #18 adds drag-and-drop movement to the project-specific Kanban board:
 - Project workspaces link to the Kanban board, and story detail pages link back to the board.
 - Empty columns show clear empty states.
 
-The board intentionally does not implement story editing, deletion, charts, risk workflows, or AI provider calls.
+The board intentionally does not implement story editing, deletion, charts, or risk workflows.
 
 The implementation assumes `public.user_stories.status` and `public.user_stories.sort_order` already exist, as defined in the initial schema, and also uses the Issue #14 story fields such as `acceptance_criteria` and `story_points` for card metadata.
+
+## AI user story generator status
+
+Issue #20 adds a project-scoped AI story generator:
+
+- `/projects/[projectId]/ai/story-generator` is protected by the existing Supabase server-side user check.
+- The generator accepts a required feature idea plus optional target user/persona and business goal context.
+- Input is validated with Zod before the provider call.
+- Client components call Minavolve's protected `/api/ai/user-story` route; `OPENAI_API_KEY` is read only on the server.
+- The API route uses the OpenAI Responses API with structured JSON output for title, user story, description, suggested priority, suggested story points, and acceptance criteria.
+- Successful generations are logged to `public.ai_generations` for the selected project when the cloud schema supports `generation_type = 'user_story'`.
+- Generated output is copy-ready and links back to the manual story creation form.
+
+The generator intentionally does not insert user stories automatically, edit existing stories, generate acceptance criteria independently, or add broader assistant workflows.
+
+If generation logging returns an `ai_generations_type_check` or missing column message, confirm the Supabase cloud `public.ai_generations` table supports the Issue #20 logging shape before retesting. This issue does not add or modify migration files.
 
 ## Environment variables
 
@@ -176,10 +195,12 @@ Copy `.env.example` to `.env.local` and provide the Supabase cloud project value
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-AI provider variables remain placeholders for later issues:
+AI provider variables:
 
 - `OPENAI_API_KEY`
-- `ANTHROPIC_API_KEY`
+- `OPENAI_MODEL` (optional, defaults to `gpt-4.1-mini`)
+
+Do not prefix `OPENAI_API_KEY` with `NEXT_PUBLIC_`. It must remain server-only and should be configured in local `.env.local` and deployment environment variables.
 
 ## Supabase Auth setup
 
