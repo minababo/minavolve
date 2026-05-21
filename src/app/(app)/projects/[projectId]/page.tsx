@@ -6,7 +6,6 @@ import {
   CalendarDays,
   ClipboardList,
   Columns3,
-  FolderKanban,
   ListChecks,
   MessageSquarePlus,
   MessageSquareText,
@@ -121,11 +120,19 @@ export default async function ProjectWorkspacePage({
   }
 
   const typedProject = project as ProjectWorkspace;
-  const { data: sprints, error: sprintsError } = await supabase
-    .from("sprints")
-    .select("id,project_id,name,goal,status,start_date,end_date,created_at")
-    .eq("project_id", projectId)
-    .order("created_at", { ascending: false });
+  const [{ data: sprints, error: sprintsError }, { count: openRiskCount }] =
+    await Promise.all([
+      supabase
+        .from("sprints")
+        .select("id,project_id,name,goal,status,start_date,end_date,created_at")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("risks")
+        .select("id", { count: "exact", head: true })
+        .eq("project_id", projectId)
+        .eq("status", "open"),
+    ]);
   const sprintRows = (sprints ?? []) as SprintCardSprint[];
   const sprintNameById = new Map(
     sprintRows.map((sprint) => [sprint.id, sprint.name]),
@@ -161,7 +168,7 @@ export default async function ProjectWorkspacePage({
           </Link>
 
           <header className="rounded-[2rem] border border-white/80 bg-white/88 p-5 shadow-[0_25px_80px_-55px_rgba(15,23,42,0.72)] backdrop-blur sm:p-6">
-            <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+            <div className="flex flex-col gap-5">
               <div className="flex items-start gap-4">
                 <div className="inline-flex size-14 items-center justify-center rounded-3xl bg-slate-950 font-heading text-sm font-semibold tracking-[0.14em] text-white">
                   {typedProject.project_key}
@@ -180,7 +187,7 @@ export default async function ProjectWorkspacePage({
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row xl:items-center">
+              <div className="flex flex-wrap items-center gap-3">
                 <span className="h-fit rounded-full bg-brand-soft px-4 py-2 text-sm font-semibold capitalize text-brand">
                   {typedProject.status}
                 </span>
@@ -235,6 +242,16 @@ export default async function ProjectWorkspacePage({
                 <Button
                   asChild
                   size="lg"
+                  className="h-10 rounded-2xl border border-rose-200 bg-rose-50 px-4 text-rose-950 hover:bg-rose-100"
+                >
+                  <Link href={`/projects/${typedProject.id}/risks`}>
+                    <ShieldAlert className="size-4" />
+                    Risks
+                  </Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
                   className="h-10 rounded-2xl bg-slate-950 px-4 text-white hover:bg-slate-800"
                 >
                   <Link href={`/projects/${typedProject.id}/kanban`}>
@@ -259,9 +276,9 @@ export default async function ProjectWorkspacePage({
                 Icon: CalendarDays,
               },
               {
-                label: "Workspace status",
-                value: "Kanban ready",
-                Icon: FolderKanban,
+                label: "Open risks",
+                value: String(openRiskCount ?? 0),
+                Icon: ShieldAlert,
               },
             ].map((item) => (
               <article

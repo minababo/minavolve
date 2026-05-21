@@ -36,20 +36,32 @@ export default async function DashboardPage() {
   }
 
   const userEmail = user.email ?? "Authenticated user";
-  const { count: projectCount } = await supabase
-    .from("projects")
-    .select("id", { count: "exact", head: true });
-  const { count: activeSprintCount } = await supabase
-    .from("sprints")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "active");
-  const { count: userStoryCount } = await supabase
-    .from("user_stories")
-    .select("id", { count: "exact", head: true });
+  const [
+    { count: projectCount },
+    { count: activeSprintCount },
+    { count: userStoryCount },
+    { count: openRiskCount },
+  ] = await Promise.all([
+    supabase
+      .from("projects")
+      .select("id", { count: "exact", head: true }),
+    supabase
+      .from("sprints")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "active"),
+    supabase
+      .from("user_stories")
+      .select("id", { count: "exact", head: true }),
+    supabase
+      .from("risks")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "open"),
+  ]);
   const summaryCards = getDashboardSummaryCards(
     projectCount ?? 0,
     activeSprintCount ?? 0,
     userStoryCount ?? 0,
+    openRiskCount ?? 0,
   );
 
   return (

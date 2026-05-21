@@ -150,6 +150,7 @@ export function getDashboardSummaryCards(
   projectCount: number,
   activeSprintCount = 0,
   userStoryCount = 0,
+  openRiskCount = 0,
 ) {
   return dashboardSummaryCards.map((card) => {
     if (card.label === "Projects") {
@@ -182,6 +183,20 @@ export function getDashboardSummaryCards(
           userStoryCount === 1
             ? "1 story available through RLS"
             : `${userStoryCount} stories available through RLS`,
+      };
+    }
+
+    if (card.label === "Open risks") {
+      return {
+        ...card,
+        value: String(openRiskCount),
+        detail: "Open delivery risks across all your projects through RLS.",
+        trend:
+          openRiskCount === 0
+            ? "No open risks right now"
+            : openRiskCount === 1
+              ? "1 open risk to review"
+              : `${openRiskCount} open risks to review`,
       };
     }
 
