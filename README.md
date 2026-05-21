@@ -1,6 +1,6 @@
 # Minavolve
 
-Minavolve is an Agile sprint board product concept with an AI-assisted backlog workflow. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, initial Supabase-backed project/sprint/user story creation and listing, a drag-and-drop Kanban board that persists story status and order, and an AI user story generator for project workspaces.
+Minavolve is an Agile sprint board product concept with an AI-assisted backlog workflow. This repository currently ships a polished landing page, Supabase email/password authentication, an authenticated dashboard layout, initial Supabase-backed project/sprint/user story creation and listing, a drag-and-drop Kanban board that persists story status and order, an AI user story generator, and an AI acceptance criteria generator for project workspaces.
 
 ## What this issue includes
 
@@ -15,6 +15,7 @@ Minavolve is an Agile sprint board product concept with an AI-assisted backlog w
 - Project-scoped user story listing, story creation, optional sprint assignment, and a basic story workspace placeholder backed by Supabase RLS
 - Project-scoped drag-and-drop Kanban board grouped by user story status
 - Project-scoped AI user story generator backed by a protected server API route
+- Project-scoped AI acceptance criteria generator backed by a protected server API route
 - Starter environment variable documentation in `.env.example`
 - Initial Supabase schema migration for projects, sprints, stories, risks, AI generations, activity, memberships, and profiles
 
@@ -25,7 +26,8 @@ Minavolve is an Agile sprint board product concept with an AI-assisted backlog w
 - No user story editing or deletion
 - No story editing, deletion, or assignee workflows from the Kanban board
 - No charts or risk register CRUD
-- No acceptance criteria-only generator, story auto-insert, charts, or risk AI workflows
+- No story auto-insert from AI output
+- No charts or risk AI workflows
 
 ## Tech stack
 
@@ -97,6 +99,7 @@ npm run lint
 - `/projects/[projectId]/stories/[storyId]`: protected user story workspace placeholder
 - `/projects/[projectId]/kanban`: protected project-specific Kanban board grouped by story status
 - `/projects/[projectId]/ai/story-generator`: protected AI user story generator
+- `/projects/[projectId]/ai/acceptance-criteria`: protected AI acceptance criteria generator
 
 ## Dashboard status
 
@@ -178,14 +181,31 @@ Issue #20 adds a project-scoped AI story generator:
 - `/projects/[projectId]/ai/story-generator` is protected by the existing Supabase server-side user check.
 - The generator accepts a required feature idea plus optional target user/persona and business goal context.
 - Input is validated with Zod before the provider call.
-- Client components call Minavolve's protected `/api/ai/user-story` route; `OPENAI_API_KEY` is read only on the server.
-- The API route uses the OpenAI Responses API with structured JSON output for title, user story, description, suggested priority, suggested story points, and acceptance criteria.
+- Client components call Minavolve's protected `/api/ai/user-story` route; `GROQ_API_KEY` is read only on the server.
+- The API route calls Groq Chat Completions with `response_format: json_object` for title, user story, description, suggested priority, suggested story points, and acceptance criteria.
 - Successful generations are logged to `public.ai_generations` for the selected project when the cloud schema supports `generation_type = 'user_story'`.
 - Generated output is copy-ready and links back to the manual story creation form.
 
-The generator intentionally does not insert user stories automatically, edit existing stories, generate acceptance criteria independently, or add broader assistant workflows.
+The generator intentionally does not insert user stories automatically, edit existing stories, or add broader assistant workflows.
 
-If generation logging returns an `ai_generations_type_check` or missing column message, confirm the Supabase cloud `public.ai_generations` table supports the Issue #20 logging shape before retesting. This issue does not add or modify migration files.
+Apply migration `20260503000500_add_user_story_generation_type.sql` in the Supabase cloud SQL editor to enable generation logging.
+
+## AI acceptance criteria generator status
+
+Issue #11 adds a project-scoped AI acceptance criteria generator:
+
+- `/projects/[projectId]/ai/acceptance-criteria` is protected by the existing Supabase server-side user check.
+- The generator accepts a required user story title (minimum 10 characters) plus optional story description or context.
+- Input is validated with Zod before the provider call.
+- Client components call Minavolve's protected `/api/ai/acceptance-criteria` route; `GROQ_API_KEY` is read only on the server.
+- The API route calls Groq Chat Completions with `response_format: json_object` and returns 3 to 8 testable acceptance criteria.
+- Successful generations are logged to `public.ai_generations` with `generation_type = 'acceptance_criteria'`.
+- Each criterion can be copied individually, or the full list can be copied in one click.
+- The AC generator is linked from the project workspace header, the user stories backlog section, and individual story detail pages.
+
+The generator intentionally does not insert criteria automatically into existing stories or add broader assistant workflows.
+
+Apply migration `20260503000600_add_acceptance_criteria_generation_type.sql` in the Supabase cloud SQL editor to enable generation logging.
 
 ## Environment variables
 

@@ -1,4 +1,34 @@
-import type { AiStoryGeneratorInput } from "@/lib/ai/types";
+import type {
+  AiCriteriaGeneratorInput,
+  AiStoryGeneratorInput,
+} from "@/lib/ai/types";
+
+export const acceptanceCriteriaGeneratorInstructions = [
+  "You are Minavolve's Agile product assistant.",
+  "Generate testable acceptance criteria for an Agile user story.",
+  "Each criterion must be observable, specific, and verifiable by a tester.",
+  "Do not mention that you are an AI assistant.",
+  "Return ONLY the raw JSON object — no markdown, no code fences, no explanation, no wrapper key.",
+].join(" ");
+
+export function buildAcceptanceCriteriaPrompt(input: AiCriteriaGeneratorInput) {
+  const context = input.storyContext?.trim() || "Not specified";
+
+  return [
+    "Generate acceptance criteria for this user story.",
+    "",
+    `Story title: ${input.storyTitle.trim()}`,
+    `Additional context: ${context}`,
+    "",
+    "Return ONLY a flat JSON object with exactly this key — no wrapper, no extra fields:",
+    '{"acceptance_criteria":["...","...","..."]}',
+    "",
+    "Field rules:",
+    "- acceptance_criteria: array of 3 to 8 observable, testable strings",
+    "- Each criterion should begin with a clear observable condition or action verb",
+    "- Be specific and verifiable — avoid vague language",
+  ].join("\n");
+}
 
 export const userStoryGeneratorInstructions = [
   "You are Minavolve's Agile product assistant.",

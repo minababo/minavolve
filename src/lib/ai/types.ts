@@ -1,5 +1,19 @@
 import type { StoryPriority } from "@/lib/validators/story";
 
+export type AiCriteriaGeneratorInput = {
+  projectId: string;
+  storyTitle: string;
+  storyContext?: string | null;
+};
+
+export type GeneratedCriteria = {
+  acceptance_criteria: string[];
+};
+
+export type AiCriteriaGeneratorResponse = {
+  criteria: GeneratedCriteria;
+};
+
 export type AiStoryGeneratorInput = {
   projectId: string;
   featureIdea: string;

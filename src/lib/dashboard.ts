@@ -361,12 +361,16 @@ export const assistantPrompts: AssistantPrompt[] = [
     detail: "Project workspaces can draft structured stories from feature ideas.",
   },
   {
+    label: "Generate acceptance criteria",
+    detail: "Project workspaces can generate 3 to 8 testable criteria from a story title.",
+  },
+  {
     label: "Copy into backlog",
     detail: "Generated titles, descriptions, points, and criteria are copy-ready.",
   },
   {
     label: "Audit generation history",
-    detail: "Successful AI story drafts are logged to Supabase per project.",
+    detail: "Successful AI generations are logged to Supabase per project.",
   },
 ];
 
