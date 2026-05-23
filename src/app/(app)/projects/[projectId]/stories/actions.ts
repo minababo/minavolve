@@ -144,3 +144,106 @@ export async function createStory(formData: FormData) {
 
   redirect(`/projects/${projectId}/stories/${storyId}`);
 }
+
+export async function updateStory(formData: FormData) {
+  const storyId = getString(formData, "storyId");
+  const projectId = getString(formData, "projectId");
+
+  if (!storyId || !projectId) {
+    redirect("/projects");
+  }
+
+  const parsed = storyFormSchema.safeParse({
+    title: getString(formData, "title"),
+    description: getString(formData, "description"),
+    acceptance_criteria: parseAcceptanceCriteria(
+      formData.get("acceptance_criteria"),
+    ),
+    story_points: getString(formData, "story_points"),
+    priority: getString(formData, "priority"),
+    status: getString(formData, "status"),
+    sprint_id: getString(formData, "sprint_id"),
+  });
+
+  if (!parsed.success) {
+    redirect(
+      `/projects/${projectId}/stories/${storyId}?error=${encodeURIComponent(
+        parsed.error.issues[0]?.message ?? "Enter valid story details.",
+      )}`,
+    );
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: story, error: storyCheckError } = await supabase
+    .from("user_stories")
+    .select("id")
+    .eq("id", storyId)
+    .eq("project_id", projectId)
+    .maybeSingle();
+
+  if (storyCheckError || !story) {
+    redirect(
+      `/projects/${projectId}/stories/${storyId}?error=${encodeURIComponent(
+        "Story not found or access denied.",
+      )}`,
+    );
+  }
+
+  if (parsed.data.sprint_id) {
+    const { data: sprint, error: sprintError } = await supabase
+      .from("sprints")
+      .select("id")
+      .eq("id", parsed.data.sprint_id)
+      .eq("project_id", projectId)
+      .maybeSingle();
+
+    if (sprintError || !sprint) {
+      redirect(
+        `/projects/${projectId}/stories/${storyId}?error=${encodeURIComponent(
+          "Selected sprint does not belong to this project.",
+        )}`,
+      );
+    }
+  }
+
+  const { error } = await supabase
+    .from("user_stories")
+    .update({
+      title: parsed.data.title,
+      description: parsed.data.description,
+      acceptance_criteria: parsed.data.acceptance_criteria,
+      story_points: parsed.data.story_points,
+      priority: parsed.data.priority,
+      status: parsed.data.status,
+      sprint_id: parsed.data.sprint_id,
+    })
+    .eq("id", storyId);
+
+  if (error) {
+    redirect(
+      `/projects/${projectId}/stories/${storyId}?error=${encodeURIComponent(
+        getStoryCreateErrorMessage(error.message),
+      )}`,
+    );
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath(`/projects/${projectId}/stories/${storyId}`);
+
+  if (parsed.data.sprint_id) {
+    revalidatePath(`/projects/${projectId}/sprints/${parsed.data.sprint_id}`);
+  }
+
+  redirect(
+    `/projects/${projectId}/stories/${storyId}?success=${encodeURIComponent("Story saved.")}`,
+  );
+}

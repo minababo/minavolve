@@ -9,6 +9,7 @@ import {
 export type DashboardSummaryCard = {
   label: string;
   value: string;
+  numericValue: number;
   detail: string;
   trend: string;
   tone: "blue" | "green" | "amber" | "rose";
@@ -24,6 +25,7 @@ export const dashboardSummaryCards: DashboardSummaryCard[] = [
   {
     label: "Projects",
     value: "0",
+    numericValue: 0,
     detail: "Supabase projects where the current user is a member.",
     trend: "Create a project to seed the workspace",
     tone: "blue",
@@ -32,6 +34,7 @@ export const dashboardSummaryCards: DashboardSummaryCard[] = [
   {
     label: "Active sprints",
     value: "0",
+    numericValue: 0,
     detail: "Supabase sprints currently marked active.",
     trend: "Create an active sprint to start delivery",
     tone: "green",
@@ -40,6 +43,7 @@ export const dashboardSummaryCards: DashboardSummaryCard[] = [
   {
     label: "User stories",
     value: "0",
+    numericValue: 0,
     detail: "Supabase user stories visible to the current user.",
     trend: "Create stories from a project workspace",
     tone: "amber",
@@ -48,6 +52,7 @@ export const dashboardSummaryCards: DashboardSummaryCard[] = [
   {
     label: "Open risks",
     value: "0",
+    numericValue: 0,
     detail: "Open delivery risks across all your projects through RLS.",
     trend: "No open risks right now",
     tone: "rose",
@@ -66,6 +71,7 @@ export function getDashboardSummaryCards(
       return {
         ...card,
         value: String(projectCount),
+        numericValue: projectCount,
         trend:
           projectCount === 1
             ? "1 project available through RLS"
@@ -77,6 +83,7 @@ export function getDashboardSummaryCards(
       return {
         ...card,
         value: String(activeSprintCount),
+        numericValue: activeSprintCount,
         trend:
           activeSprintCount === 1
             ? "1 active sprint available through RLS"
@@ -88,6 +95,7 @@ export function getDashboardSummaryCards(
       return {
         ...card,
         value: String(userStoryCount),
+        numericValue: userStoryCount,
         trend:
           userStoryCount === 1
             ? "1 story available through RLS"
@@ -99,6 +107,7 @@ export function getDashboardSummaryCards(
       return {
         ...card,
         value: String(openRiskCount),
+        numericValue: openRiskCount,
         trend:
           openRiskCount === 0
             ? "No open risks right now"

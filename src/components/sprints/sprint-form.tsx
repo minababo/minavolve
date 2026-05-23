@@ -88,11 +88,7 @@ export function SprintForm({ projectId, error }: SprintFormProps) {
         </div>
       </div>
 
-      <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm leading-6 text-slate-500">
-          User stories, Kanban data, charts, risks, and AI workflows are still
-          intentionally out of scope.
-        </p>
+      <div className="mt-7 flex justify-end">
         <Button
           type="submit"
           size="lg"

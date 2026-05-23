@@ -7,7 +7,6 @@ import {
   Columns3,
   MessageSquarePlus,
   MessageSquareText,
-  Target,
 } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 
@@ -17,6 +16,8 @@ import {
   type StoryCardStory,
 } from "@/components/stories/story-card";
 import { Button } from "@/components/ui/button";
+import { updateSprintStatus } from "@/app/(app)/projects/[projectId]/sprints/actions";
+import { cn } from "@/lib/utils";
 import { createClient } from "@/utils/supabase/server";
 
 export const metadata: Metadata = {
@@ -28,6 +29,9 @@ type SprintDetailPageProps = {
   params: Promise<{
     projectId: string;
     sprintId: string;
+  }>;
+  searchParams: Promise<{
+    success?: string | string[];
   }>;
 };
 
@@ -76,8 +80,46 @@ function formatDate(date: string | null) {
   }).format(new Date(`${date}T00:00:00`));
 }
 
+type StatusAction = {
+  label: string;
+  newStatus: string;
+  buttonClass: string;
+} | null;
+
+function getStatusAction(status: string): StatusAction {
+  if (status === "planned") {
+    return {
+      label: "Start sprint",
+      newStatus: "active",
+      buttonClass:
+        "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100",
+    };
+  }
+  if (status === "active") {
+    return {
+      label: "Complete sprint",
+      newStatus: "completed",
+      buttonClass: "border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-100",
+    };
+  }
+  if (status === "completed") {
+    return {
+      label: "Reopen",
+      newStatus: "planned",
+      buttonClass:
+        "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100",
+    };
+  }
+  return null;
+}
+
+function getSearchParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 export default async function SprintDetailPage({
   params,
+  searchParams,
 }: SprintDetailPageProps) {
   const supabase = await createClient();
   const {
@@ -89,6 +131,8 @@ export default async function SprintDetailPage({
   }
 
   const { projectId, sprintId } = await params;
+  const query = await searchParams;
+  const success = getSearchParam(query.success);
   const [{ data: project, error: projectError }, { data: sprint, error }] =
     await Promise.all([
       supabase
@@ -125,6 +169,8 @@ export default async function SprintDetailPage({
     sprint_name: typedSprint.name,
   }));
 
+  const statusAction = getStatusAction(typedSprint.status);
+
   return (
     <>
       <AppNav userEmail={user.email ?? ""} />
@@ -137,6 +183,12 @@ export default async function SprintDetailPage({
             <ArrowLeft className="size-4" />
             Back to {typedProject.name}
           </Link>
+
+          {success && (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800">
+              {success}
+            </div>
+          )}
 
           <header className="rounded-[2rem] border border-white/80 bg-white/88 p-5 shadow-[0_25px_80px_-55px_rgba(15,23,42,0.72)] backdrop-blur sm:p-6">
             <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
@@ -178,7 +230,7 @@ export default async function SprintDetailPage({
               },
               {
                 label: "Board state",
-                value: "Placeholder",
+                value: typedSprint.status,
                 Icon: Columns3,
               },
             ].map((item) => (
@@ -192,26 +244,57 @@ export default async function SprintDetailPage({
                 <p className="mt-4 text-sm font-medium text-slate-500">
                   {item.label}
                 </p>
-                <p className="mt-2 font-heading text-2xl font-semibold text-slate-950">
+                <p className="mt-2 font-heading text-2xl font-semibold capitalize text-slate-950">
                   {item.value}
                 </p>
               </article>
             ))}
           </section>
 
-          <section className="rounded-[2rem] border border-dashed border-slate-300 bg-white/72 p-6 shadow-[0_25px_80px_-60px_rgba(15,23,42,0.7)]">
-            <div className="inline-flex size-12 items-center justify-center rounded-2xl bg-slate-950 text-white">
-              <Target className="size-6" />
+          <section className="rounded-[2rem] border border-white/80 bg-white/88 p-5 shadow-[0_25px_80px_-55px_rgba(15,23,42,0.72)] backdrop-blur sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-brand">
+                  Sprint status
+                </p>
+                <h2 className="mt-2 font-heading text-2xl font-semibold text-slate-950">
+                  Manage sprint
+                </h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                  Activate this sprint to begin tracking progress, or complete
+                  it when delivery is done.
+                </p>
+              </div>
+              {statusAction && (
+                <form action={updateSprintStatus} className="shrink-0">
+                  <input type="hidden" name="sprintId" value={typedSprint.id} />
+                  <input
+                    type="hidden"
+                    name="projectId"
+                    value={typedProject.id}
+                  />
+                  <input
+                    type="hidden"
+                    name="newStatus"
+                    value={statusAction.newStatus}
+                  />
+                  <input
+                    type="hidden"
+                    name="redirectTo"
+                    value={`/projects/${typedProject.id}/sprints/${typedSprint.id}`}
+                  />
+                  <button
+                    type="submit"
+                    className={cn(
+                      "h-10 rounded-2xl border px-5 text-sm font-semibold transition-colors",
+                      statusAction.buttonClass,
+                    )}
+                  >
+                    {statusAction.label}
+                  </button>
+                </form>
+              )}
             </div>
-            <h2 className="mt-5 font-heading text-2xl font-semibold text-slate-950">
-              Sprint execution comes next
-            </h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-              This placeholder confirms project-scoped sprint routing and RLS
-              reads. Story listing is available below; Kanban data,
-              drag-and-drop, charts, risks, and AI actions remain out of scope
-              for Issue #14.
-            </p>
           </section>
 
           <section className="rounded-[2rem] border border-white/80 bg-white/88 p-5 shadow-[0_25px_80px_-55px_rgba(15,23,42,0.72)] backdrop-blur sm:p-6">
