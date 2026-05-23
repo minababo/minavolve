@@ -7,6 +7,13 @@ import {
   ListTodo,
 } from "lucide-react";
 
+export const PRIORITY_ORDER = [
+  "urgent",
+  "high",
+  "medium",
+  "low",
+] as const;
+
 export const kanbanStatuses = [
   "backlog",
   "todo",
