@@ -5,7 +5,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { sprintFormSchema } from "@/lib/validators/sprint";
+import { sprintFormSchema, sprintStatuses } from "@/lib/validators/sprint";
 import { createClient } from "@/utils/supabase/server";
 
 function getString(formData: FormData, key: string) {
@@ -115,4 +115,52 @@ export async function createSprint(formData: FormData) {
   revalidatePath("/dashboard");
   revalidatePath(`/projects/${projectId}`);
   redirect(`/projects/${projectId}/sprints/${sprintId}`);
+}
+
+function getSprintSuccessMessage(newStatus: string): string {
+  if (newStatus === "active") return "Sprint activated.";
+  if (newStatus === "completed") return "Sprint completed.";
+  if (newStatus === "planned") return "Sprint reopened.";
+  return "Sprint status updated.";
+}
+
+export async function updateSprintStatus(formData: FormData) {
+  const sprintId = getString(formData, "sprintId");
+  const projectId = getString(formData, "projectId");
+  const newStatus = getString(formData, "newStatus");
+  const redirectTo = getString(formData, "redirectTo");
+
+  if (!sprintId || !projectId) return;
+  if (!(sprintStatuses as readonly string[]).includes(newStatus)) return;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: sprint, error: sprintError } = await supabase
+    .from("sprints")
+    .select("id")
+    .eq("id", sprintId)
+    .eq("project_id", projectId)
+    .maybeSingle();
+
+  if (sprintError || !sprint) return;
+
+  await supabase
+    .from("sprints")
+    .update({ status: newStatus })
+    .eq("id", sprintId);
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/projects/${projectId}`);
+  revalidatePath(`/projects/${projectId}/sprints/${sprintId}`);
+
+  const successParam = `?success=${encodeURIComponent(getSprintSuccessMessage(newStatus))}`;
+  const destination = redirectTo || `/projects/${projectId}`;
+  redirect(`${destination}${successParam}`);
 }

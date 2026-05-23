@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 
+import { StatNumber } from "@/components/app/stat-number";
 import { cn } from "@/lib/utils";
 
 export type DashboardCardTone = "blue" | "green" | "amber" | "rose";
@@ -37,6 +38,7 @@ const toneClasses: Record<
 type DashboardCardProps = {
   label: string;
   value: string;
+  numericValue?: number;
   detail: string;
   trend: string;
   tone: DashboardCardTone;
@@ -46,6 +48,7 @@ type DashboardCardProps = {
 export function DashboardCard({
   label,
   value,
+  numericValue,
   detail,
   trend,
   tone,
@@ -64,7 +67,11 @@ export function DashboardCard({
         <div>
           <p className="text-sm font-medium text-slate-500">{label}</p>
           <p className="mt-3 font-heading text-4xl font-semibold tracking-tight text-slate-950">
-            {value}
+            {numericValue !== undefined ? (
+              <StatNumber value={numericValue} />
+            ) : (
+              value
+            )}
           </p>
         </div>
         <div

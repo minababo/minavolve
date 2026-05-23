@@ -117,6 +117,7 @@ export default async function DashboardPage() {
                 key={card.label}
                 label={card.label}
                 value={card.value}
+                numericValue={card.numericValue}
                 detail={card.detail}
                 trend={card.trend}
                 tone={card.tone}

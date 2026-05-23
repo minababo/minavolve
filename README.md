@@ -27,8 +27,8 @@ Minavolve is an Agile sprint board product concept with an AI-assisted backlog w
 
 - No project editing or deletion
 - No sprint editing or deletion
-- No user story editing or deletion
-- No story editing, deletion, or assignee workflows from the Kanban board
+- No user story deletion
+- No story deletion or assignee workflows from the Kanban board
 - No story auto-insert from AI output
 - No risk editing, deletion, or AI workflows
 
@@ -268,6 +268,19 @@ Issue #28 adds a project-scoped risk register:
 - No migration is needed — `public.risks` exists from the initial schema migration.
 
 The register intentionally does not implement risk editing, deletion, or risk AI workflows.
+
+## Sprint activation and story editing status
+
+Issue #32 adds sprint lifecycle management, story editing, sprint progress bars, and dashboard count-up animation.
+
+- `updateSprintStatus` server action in `sprints/actions.ts` validates the new status against the `sprintStatuses` tuple, verifies sprint ownership via RLS, and updates `public.sprints` without redirecting so pages revalidate in place.
+- Sprint cards (`sprint-card.tsx`) show a contextual action button per status: "Start sprint" (planned → active), "Complete sprint" (active → completed), "Reopen" (completed → planned). Cancelled sprints show no action.
+- Sprint detail pages (`sprints/[sprintId]/page.tsx`) include a "Manage sprint" section with the same action button; the "Sprint execution comes next" placeholder is removed.
+- Sprint cards display a progress bar: done / total stories for that sprint. Colour is slate (0%), brand/teal (1–49%), amber (50–99%), emerald (100%). Zero-story sprints show "No stories yet".
+- `updateStory` server action in `stories/actions.ts` validates with `storyFormSchema`, verifies story and sprint ownership via RLS, and updates all story fields in `public.user_stories`.
+- Story detail pages (`stories/[storyId]/page.tsx`) show an "Edit story" section below the detail view with `StoryForm` in edit mode, pre-filled with current values.
+- `StoryForm` accepts `editMode`, `storyId`, and `defaultValues` props. In edit mode the form submits to `updateStory`, includes a hidden `storyId` input, and labels the button "Save changes".
+- `StatNumber` (`src/components/app/stat-number.tsx`) is a `"use client"` component that animates from 0 to a numeric value using `requestAnimationFrame` with cubic ease-out over 800 ms. The dashboard stat tiles use it for the four summary counts.
 
 ## UI polish status
 

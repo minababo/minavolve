@@ -38,6 +38,9 @@ type ProjectWorkspacePageProps = {
   params: Promise<{
     projectId: string;
   }>;
+  searchParams: Promise<{
+    success?: string | string[];
+  }>;
 };
 
 type ProjectWorkspace = {
@@ -82,6 +85,10 @@ function getStoryListError(message: string) {
   return "Unable to load stories for this project right now.";
 }
 
+function getSearchParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
 function formatDate(date: string | null) {
   if (!date) {
     return "Not set";
@@ -96,6 +103,7 @@ function formatDate(date: string | null) {
 
 export default async function ProjectWorkspacePage({
   params,
+  searchParams,
 }: ProjectWorkspacePageProps) {
   const supabase = await createClient();
   const {
@@ -107,6 +115,8 @@ export default async function ProjectWorkspacePage({
   }
 
   const { projectId } = await params;
+  const query = await searchParams;
+  const success = getSearchParam(query.success);
   const { data: project, error } = await supabase
     .from("projects")
     .select(
@@ -151,6 +161,18 @@ export default async function ProjectWorkspacePage({
       : null,
   }));
 
+  const storyCountBySprint = new Map<string, { total: number; done: number }>();
+  for (const story of storyRows) {
+    if (!story.sprint_id) continue;
+    const counts = storyCountBySprint.get(story.sprint_id) ?? {
+      total: 0,
+      done: 0,
+    };
+    counts.total++;
+    if (story.status === "done") counts.done++;
+    storyCountBySprint.set(story.sprint_id, counts);
+  }
+
   return (
     <>
       <AppNav userEmail={user.email ?? ""} />
@@ -163,6 +185,12 @@ export default async function ProjectWorkspacePage({
             <ArrowLeft className="size-4" />
             Back to projects
           </Link>
+
+          {success && (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-800">
+              {success}
+            </div>
+          )}
 
           <header className="rounded-[2rem] border border-white/80 bg-white/88 p-5 shadow-[0_25px_80px_-55px_rgba(15,23,42,0.72)] backdrop-blur sm:p-6">
             <div className="flex flex-col gap-5">
@@ -329,7 +357,17 @@ export default async function ProjectWorkspacePage({
               ) : sprintRows.length > 0 ? (
                 <div className="mt-6 grid gap-4 md:grid-cols-2">
                   {sprintRows.map((sprint) => (
-                    <SprintCard key={sprint.id} sprint={sprint} />
+                    <SprintCard
+                      key={sprint.id}
+                      sprint={sprint}
+                      projectId={typedProject.id}
+                      totalStories={
+                        storyCountBySprint.get(sprint.id)?.total ?? 0
+                      }
+                      doneStories={
+                        storyCountBySprint.get(sprint.id)?.done ?? 0
+                      }
+                    />
                   ))}
                 </div>
               ) : (
