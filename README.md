@@ -16,7 +16,36 @@
 
 ## Screenshots
 
-> Screenshots will be added after Vercel deployment is confirmed.
+### Landing page
+![Landing page](public/screenshots/landing-page.png)
+
+### Dashboard
+![Dashboard](public/screenshots/dashboard.png)
+
+### Project workspace
+![Project workspace](public/screenshots/project-workspace.png)
+
+![Project workspace sprints](public/screenshots/project-workspace-2.png)
+
+![Project workspace stories](public/screenshots/project-workspace-3.png)
+
+### Kanban board
+![Kanban board](public/screenshots/kanban-board.png)
+
+### Kanban board with filters active
+![Kanban filters active](public/screenshots/kanban-filters-active.png)
+
+### AI user story generator
+![AI story generator](public/screenshots/AI-story-generator-result.png)
+
+### Sprint velocity chart
+![Velocity chart](public/screenshots/velocity-chart.png)
+
+### Sprint burndown chart
+![Burndown chart](public/screenshots/burndown-chart.png)
+
+### Risk register
+![Risk register](public/screenshots/risks-register.png)
 
 ---
 
