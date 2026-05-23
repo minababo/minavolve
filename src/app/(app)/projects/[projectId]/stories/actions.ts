@@ -167,7 +167,7 @@ export async function updateStory(formData: FormData) {
 
   if (!parsed.success) {
     redirect(
-      `/projects/${projectId}/stories/${storyId}?error=${encodeURIComponent(
+      `/projects/${projectId}/stories/${storyId}/edit?error=${encodeURIComponent(
         parsed.error.issues[0]?.message ?? "Enter valid story details.",
       )}`,
     );
@@ -191,7 +191,7 @@ export async function updateStory(formData: FormData) {
 
   if (storyCheckError || !story) {
     redirect(
-      `/projects/${projectId}/stories/${storyId}?error=${encodeURIComponent(
+      `/projects/${projectId}/stories/${storyId}/edit?error=${encodeURIComponent(
         "Story not found or access denied.",
       )}`,
     );
@@ -207,7 +207,7 @@ export async function updateStory(formData: FormData) {
 
     if (sprintError || !sprint) {
       redirect(
-        `/projects/${projectId}/stories/${storyId}?error=${encodeURIComponent(
+        `/projects/${projectId}/stories/${storyId}/edit?error=${encodeURIComponent(
           "Selected sprint does not belong to this project.",
         )}`,
       );
@@ -229,7 +229,7 @@ export async function updateStory(formData: FormData) {
 
   if (error) {
     redirect(
-      `/projects/${projectId}/stories/${storyId}?error=${encodeURIComponent(
+      `/projects/${projectId}/stories/${storyId}/edit?error=${encodeURIComponent(
         getStoryCreateErrorMessage(error.message),
       )}`,
     );

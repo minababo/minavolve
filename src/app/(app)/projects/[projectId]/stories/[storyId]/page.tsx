@@ -14,15 +14,11 @@ import {
 import { notFound, redirect } from "next/navigation";
 
 import { AppNav } from "@/components/app/app-nav";
-import {
-  StoryForm,
-  type StorySprintOption,
-} from "@/components/stories/story-form";
 import { createClient } from "@/utils/supabase/server";
 
 export const metadata: Metadata = {
   title: "Story workspace",
-  description: "Minavolve user story workspace placeholder.",
+  description: "Minavolve user story workspace.",
 };
 
 type StoryDetailPageProps = {
@@ -31,7 +27,6 @@ type StoryDetailPageProps = {
     storyId: string;
   }>;
   searchParams: Promise<{
-    error?: string | string[];
     success?: string | string[];
   }>;
 };
@@ -82,7 +77,6 @@ export default async function StoryDetailPage({
   const [
     { data: project, error: projectError },
     { data: story, error },
-    { data: sprints },
   ] = await Promise.all([
     supabase
       .from("projects")
@@ -97,11 +91,6 @@ export default async function StoryDetailPage({
       .eq("project_id", projectId)
       .eq("id", storyId)
       .maybeSingle(),
-    supabase
-      .from("sprints")
-      .select("id,name,status")
-      .eq("project_id", projectId)
-      .order("created_at", { ascending: false }),
   ]);
 
   if (projectError || error || !project || !story) {
@@ -124,9 +113,7 @@ export default async function StoryDetailPage({
   }
 
   const criteria = typedStory.acceptance_criteria ?? [];
-  const sprintOptions = (sprints ?? []) as StorySprintOption[];
   const query = await searchParams;
-  const editError = getSearchParam(query.error);
   const editSuccess = getSearchParam(query.success);
 
   return (
@@ -151,7 +138,7 @@ export default async function StoryDetailPage({
           <header className="rounded-[2rem] border border-white/80 bg-white/88 p-5 shadow-[0_25px_80px_-55px_rgba(15,23,42,0.72)] backdrop-blur sm:p-6">
             <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
               <div className="flex items-start gap-4">
-                <div className="inline-flex size-14 items-center justify-center rounded-3xl bg-slate-950 text-white">
+                <div className="inline-flex size-14 shrink-0 items-center justify-center rounded-3xl bg-slate-950 text-white">
                   <MessageSquareText className="size-7" />
                 </div>
                 <div>
@@ -168,9 +155,18 @@ export default async function StoryDetailPage({
                 </div>
               </div>
 
-              <span className="h-fit rounded-full bg-brand-soft px-4 py-2 text-sm font-semibold capitalize text-brand">
-                {typedStory.status.replaceAll("_", " ")}
-              </span>
+              <div className="flex shrink-0 flex-wrap items-center gap-3">
+                <span className="h-fit rounded-full bg-brand-soft px-4 py-2 text-sm font-semibold capitalize text-brand">
+                  {typedStory.status.replaceAll("_", " ")}
+                </span>
+                <Link
+                  href={`/projects/${typedProject.id}/stories/${typedStory.id}/edit`}
+                  className="inline-flex h-10 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-950 transition-colors hover:bg-slate-50"
+                >
+                  <Pencil className="size-4" />
+                  Edit story
+                </Link>
+              </div>
             </div>
           </header>
 
@@ -252,38 +248,6 @@ export default async function StoryDetailPage({
                 No acceptance criteria were added for this story.
               </p>
             )}
-          </section>
-
-          <section className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="inline-flex size-9 items-center justify-center rounded-xl bg-brand-soft text-brand">
-                <Pencil className="size-4" />
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-brand">
-                  Story editing
-                </p>
-                <h2 className="font-heading text-2xl font-semibold text-slate-950">
-                  Edit story
-                </h2>
-              </div>
-            </div>
-            <StoryForm
-              projectId={typedProject.id}
-              sprints={sprintOptions}
-              error={editError}
-              editMode
-              storyId={typedStory.id}
-              defaultValues={{
-                title: typedStory.title,
-                description: typedStory.description,
-                acceptance_criteria: typedStory.acceptance_criteria,
-                story_points: typedStory.story_points,
-                priority: typedStory.priority,
-                status: typedStory.status,
-                sprint_id: typedStory.sprint_id,
-              }}
-            />
           </section>
         </div>
       </main>
