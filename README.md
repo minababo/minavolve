@@ -23,34 +23,40 @@
 ## Features
 
 **Authentication & Security**
+
 - Email/password registration and login via Supabase Auth
 - Server-side session handling with @supabase/ssr
 - Row Level Security (RLS) on all database tables
 - Protected routes via Next.js middleware
 
 **Project & Sprint Management**
+
 - Create and edit projects with status tracking
 - Sprint creation with start/end dates, goals, and status lifecycle (Planned → Active → Completed)
 - Sprint progress bars showing done/total story counts
 - Sprint velocity chart and burndown chart (Recharts)
 
 **User Stories & Kanban**
+
 - Create and edit user stories with story points, priority, and sprint assignment
 - Drag-and-drop Kanban board across five workflow columns (Backlog / To Do / In Progress / Review / Done)
 - Filter Kanban board by priority and sprint
 - Story status persists to Supabase after every drop
 
 **AI Assistant (Groq)**
+
 - AI user story generator: converts a feature idea into a structured Agile user story with acceptance criteria
 - AI acceptance criteria generator: produces 3–8 testable criteria from a story title
 - All generations logged to Supabase per project
 
 **Risk Register**
+
 - Log delivery risks with probability, impact, mitigation notes, and status
 - Risk score (probability × impact) with colour-coded severity badges
 - Status lifecycle: Open → Mitigating → Resolved → Accepted
 
 **Dashboard**
+
 - Live summary tiles: project count, active sprints, stories, open risks — all from Supabase via RLS
 - Recent projects list with workspace links
 - Animated count-up on dashboard stat numbers
@@ -59,23 +65,24 @@
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16 (App Router) + TypeScript |
-| Styling | Tailwind CSS + shadcn/ui |
-| Database | Supabase PostgreSQL |
-| Auth | Supabase Auth + @supabase/ssr |
-| AI | Groq API (llama-3.3-70b-versatile) |
-| Charts | Recharts |
-| Drag-and-drop | @dnd-kit/core + @dnd-kit/sortable |
-| Validation | Zod |
-| Deployment | Vercel |
+| Layer         | Technology                           |
+| ------------- | ------------------------------------ |
+| Framework     | Next.js 16 (App Router) + TypeScript |
+| Styling       | Tailwind CSS + shadcn/ui             |
+| Database      | Supabase PostgreSQL                  |
+| Auth          | Supabase Auth + @supabase/ssr        |
+| AI            | Groq API (llama-3.3-70b-versatile)   |
+| Charts        | Recharts                             |
+| Drag-and-drop | @dnd-kit/core + @dnd-kit/sortable    |
+| Validation    | Zod                                  |
+| Deployment    | Vercel                               |
 
 ---
 
 ## Local Setup
 
 ### Prerequisites
+
 - Node.js 20+
 - A Supabase project (free tier works)
 - A Groq API key (free at [console.groq.com](https://console.groq.com))
@@ -93,13 +100,13 @@ npm run dev
 
 ### Environment Variables
 
-| Variable | Description |
-|---|---|
-| `NEXT_PUBLIC_APP_URL` | Your app URL (`http://localhost:3000` locally) |
-| `NEXT_PUBLIC_SUPABASE_URL` | From Supabase project settings |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | From Supabase project settings |
-| `GROQ_API_KEY` | From console.groq.com — server-only, never expose publicly |
-| `GROQ_MODEL` | AI model name (default: `llama-3.3-70b-versatile`) |
+| Variable                        | Description                                                |
+| ------------------------------- | ---------------------------------------------------------- |
+| `NEXT_PUBLIC_APP_URL`           | Your app URL (`http://localhost:3000` locally)             |
+| `NEXT_PUBLIC_SUPABASE_URL`      | From Supabase project settings                             |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | From Supabase project settings                             |
+| `GROQ_API_KEY`                  | From console.groq.com — server-only, never expose publicly |
+| `GROQ_MODEL`                    | AI model name (default: `llama-3.3-70b-versatile`)         |
 
 ### Database Setup
 
@@ -114,7 +121,7 @@ Apply all migration files in order from `supabase/migrations/` using the Supabas
 3. Set `NEXT_PUBLIC_APP_URL` to your Vercel deployment URL
 4. In **Supabase → Authentication → URL Configuration**, add your Vercel URL to Redirect URLs:
    ```
-   https://your-app.vercel.app/**
+   https://minavolve.vercel.app/**
    ```
 5. Deploy — Vercel will detect Next.js automatically
 
@@ -144,6 +151,6 @@ supabase/migrations/   — ordered SQL migration files
 
 ## About
 
-Built by Minada Amarasinghe, a final-year software engineering undergraduate in Sri Lanka, to demonstrate full-stack Next.js development, Agile tooling, AI API integration, and cloud deployment for internship applications.
+Built by Minada Amarasinghe to demonstrate full-stack Next.js development, Agile tooling, AI API integration, and cloud deployment.
 
 GitHub: [https://github.com/minababo](https://github.com/minababo)
