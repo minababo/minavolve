@@ -9,6 +9,7 @@ import {
   ListChecks,
   MessageSquarePlus,
   MessageSquareText,
+  Pencil,
   Plus,
   ShieldAlert,
   Sparkles,
@@ -40,6 +41,7 @@ type ProjectWorkspacePageProps = {
   }>;
   searchParams: Promise<{
     success?: string | string[];
+    error?: string | string[];
   }>;
 };
 
@@ -51,6 +53,7 @@ type ProjectWorkspace = {
   status: string;
   start_date: string | null;
   target_end_date: string | null;
+  owner_id: string;
   created_at: string;
   updated_at: string;
 };
@@ -117,10 +120,11 @@ export default async function ProjectWorkspacePage({
   const { projectId } = await params;
   const query = await searchParams;
   const success = getSearchParam(query.success);
+  const errorParam = getSearchParam(query.error);
   const { data: project, error } = await supabase
     .from("projects")
     .select(
-      "id,name,project_key,description,status,start_date,target_end_date,created_at,updated_at",
+      "id,name,project_key,description,status,start_date,target_end_date,owner_id,created_at,updated_at",
     )
     .eq("id", projectId)
     .maybeSingle();
@@ -192,24 +196,42 @@ export default async function ProjectWorkspacePage({
             </div>
           )}
 
+          {errorParam === "not_owner" && (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-800">
+              Only the project owner can edit this project.
+            </div>
+          )}
+
           <header className="rounded-[2rem] border border-white/80 bg-white/88 p-5 shadow-[0_25px_80px_-55px_rgba(15,23,42,0.72)] backdrop-blur sm:p-6">
             <div className="flex flex-col gap-5">
-              <div className="flex items-start gap-4">
-                <div className="inline-flex size-14 items-center justify-center rounded-3xl bg-slate-950 font-heading text-sm font-semibold tracking-[0.14em] text-white">
-                  {typedProject.project_key}
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-start gap-4">
+                  <div className="inline-flex size-14 shrink-0 items-center justify-center rounded-3xl bg-slate-950 font-heading text-sm font-semibold tracking-[0.14em] text-white">
+                    {typedProject.project_key}
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-brand">
+                      Project workspace
+                    </p>
+                    <h1 className="mt-2 font-heading text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                      {typedProject.name}
+                    </h1>
+                    <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+                      {typedProject.description ??
+                        "No project description yet. Project editing and richer sprint setup will be implemented in later issues."}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-brand">
-                    Project workspace
-                  </p>
-                  <h1 className="mt-2 font-heading text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
-                    {typedProject.name}
-                  </h1>
-                  <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                    {typedProject.description ??
-                      "No project description yet. Project editing and richer sprint setup will be implemented in later issues."}
-                  </p>
-                </div>
+
+                {typedProject.owner_id === user.id && (
+                  <Link
+                    href={`/projects/${typedProject.id}/edit`}
+                    className="inline-flex h-10 shrink-0 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-950 transition-colors hover:bg-slate-50"
+                  >
+                    <Pencil className="size-4" />
+                    Edit project
+                  </Link>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
