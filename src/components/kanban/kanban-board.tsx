@@ -30,10 +30,14 @@ import {
 } from "@/lib/kanban";
 
 import { KanbanColumn } from "./kanban-column";
+import { KanbanFilters } from "./kanban-filters";
+
+type KanbanSprint = { id: string; name: string };
 
 type KanbanBoardProps = {
   projectId: string;
   initialStories: KanbanStory[];
+  sprints: KanbanSprint[];
 };
 
 type ReorderedBoard = {
@@ -201,7 +205,7 @@ function getPersistedMove(
   };
 }
 
-export function KanbanBoard({ projectId, initialStories }: KanbanBoardProps) {
+export function KanbanBoard({ projectId, initialStories, sprints }: KanbanBoardProps) {
   const router = useRouter();
   const dragStartStoriesRef = useRef<KanbanStory[] | null>(null);
   const [stories, setStories] = useState(initialStories);
@@ -211,6 +215,8 @@ export function KanbanBoard({ projectId, initialStories }: KanbanBoardProps) {
   const [pendingStoryId, setPendingStoryId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState("all");
+  const [sprintFilter, setSprintFilter] = useState("all");
   const [isPending, startTransition] = useTransition();
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -227,7 +233,13 @@ export function KanbanBoard({ projectId, initialStories }: KanbanBoardProps) {
       },
     }),
   );
-  const columns = buildKanbanColumns(stories);
+  const filteredStories = stories.filter((story) => {
+    if (priorityFilter !== "all" && story.priority !== priorityFilter) return false;
+    if (sprintFilter !== "all" && story.sprint_id !== sprintFilter) return false;
+    return true;
+  });
+  const allColumns = buildKanbanColumns(stories);
+  const filteredColumns = buildKanbanColumns(filteredStories);
   const movementDisabled = isPending || Boolean(pendingStoryId);
 
   function handleDragStart(event: DragStartEvent) {
@@ -334,7 +346,7 @@ export function KanbanBoard({ projectId, initialStories }: KanbanBoardProps) {
         {announcement}
       </p>
 
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm leading-6 text-slate-600">
           Click a story card to open it, or drag the card between columns to
           update its workflow status.
@@ -345,6 +357,16 @@ export function KanbanBoard({ projectId, initialStories }: KanbanBoardProps) {
           </p>
         ) : null}
       </div>
+
+      <KanbanFilters
+        sprints={sprints}
+        activePriorityFilter={priorityFilter}
+        activeSprintFilter={sprintFilter}
+        onPriorityChange={setPriorityFilter}
+        onSprintChange={setSprintFilter}
+        totalVisible={filteredStories.length}
+        totalCards={stories.length}
+      />
 
       {error ? (
         <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-800">
@@ -363,17 +385,24 @@ export function KanbanBoard({ projectId, initialStories }: KanbanBoardProps) {
       >
         <div className="overflow-x-auto pb-3">
           <div className="grid min-w-[1180px] grid-cols-5 gap-4">
-            {columns.map((column) => (
-              <KanbanColumn
-                key={column.status}
-                column={column}
-                disabled={movementDisabled}
-                isDropTarget={
-                  Boolean(activeStory) && activeOverStatus === column.status
-                }
-                pendingStoryId={pendingStoryId}
-              />
-            ))}
+            {filteredColumns.map((filteredColumn, index) => {
+              const allColumn = allColumns[index]!;
+              return (
+                <KanbanColumn
+                  key={filteredColumn.status}
+                  column={filteredColumn}
+                  disabled={movementDisabled}
+                  isDropTarget={
+                    Boolean(activeStory) && activeOverStatus === filteredColumn.status
+                  }
+                  pendingStoryId={pendingStoryId}
+                  isFilteredEmpty={
+                    filteredColumn.stories.length === 0 &&
+                    allColumn.stories.length > 0
+                  }
+                />
+              );
+            })}
           </div>
         </div>
 

@@ -19,6 +19,7 @@ type KanbanColumnProps = {
   disabled?: boolean;
   isDropTarget?: boolean;
   pendingStoryId?: string | null;
+  isFilteredEmpty?: boolean;
 };
 
 export function KanbanColumn({
@@ -26,6 +27,7 @@ export function KanbanColumn({
   disabled = false,
   isDropTarget = false,
   pendingStoryId = null,
+  isFilteredEmpty = false,
 }: KanbanColumnProps) {
   const columnId = getKanbanColumnId(column.status);
   const { isOver, setNodeRef } = useDroppable({
@@ -83,6 +85,10 @@ export function KanbanColumn({
                 isPending={pendingStoryId === story.id}
               />
             ))
+          ) : isFilteredEmpty ? (
+            <p className="px-2 py-8 text-center text-sm leading-6 text-slate-400">
+              No stories match the current filters.
+            </p>
           ) : (
             <div className="rounded-[1.25rem] border border-dashed border-slate-300 bg-white/72 px-4 py-8 text-center text-sm leading-6 text-slate-500">
               {column.emptyState}

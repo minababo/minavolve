@@ -215,6 +215,10 @@ export default async function ProjectKanbanPage({ params }: KanbanPageProps) {
             <KanbanBoard
               projectId={typedProject.id}
               initialStories={kanbanStories}
+              sprints={((sprints ?? []) as SprintLookup[]).map((s) => ({
+                id: s.id,
+                name: s.name,
+              }))}
             />
           </section>
         </div>
